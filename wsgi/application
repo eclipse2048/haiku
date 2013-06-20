@@ -24,7 +24,7 @@
 
 #from __future__ import division, absolute_import # Aufwärtskompatibilität
 
-LOCAL_DEBUG = True
+LOCAL_DEBUG = False
 """ Gibt an, ob das Programm lokal gestartet werden soll (True) oder auf Openshift (False).
 """
 
