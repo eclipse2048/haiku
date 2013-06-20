@@ -113,7 +113,7 @@ class automatoetry:
 	def GET(self):
 		global myPoem
 		ph = myPoem.getPhenotype()
-#		print "/do GET: Phaenotyp ist\n", ph #DEBUG
+		print "/do GET: Phaenotyp ist\n", ph #DEBUG
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
 
 	def POST(self):
@@ -127,10 +127,10 @@ class automatoetry:
 			myPoem = AutoPoemSpecimen(myPoem.getChildren()[0].getGenotype())
 		elif input["child"] == "r":
 			myPoem = AutoPoemSpecimen(myPoem.getChildren()[1].getGenotype())
-
 		# Allererste Generation: nichts machen; Codeblock ist redundant
 		elif input["child"] == "0":
 			pass
+		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
 
 		# Kinder erzeugen und als JSON-Objekt zurückgeben
 		children = myPoem.procreateN(2)
