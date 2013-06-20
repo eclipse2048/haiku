@@ -22,15 +22,17 @@
 #
 #
 
-#from __future__ import division, absolute_import # Aufwärtskompatibilität
-
-LOCAL_DEBUG = False
-""" Gibt an, ob das Programm lokal gestartet werden soll (True) oder auf Openshift (False).
-"""
-
-# OpenShift-Gedöns
+from __future__ import division, absolute_import # Aufwärtskompatibilität
 import os
-if not LOCAL_DEBUG:
+
+# lokal oder Openshift?
+if os.environ.has_key("OPENSHIFT_PYTHON_DIR"]:
+	RUNS_ON_OPENSHIFT = True
+else:
+	RUNS_ON_OPENSHIFT = False
+
+# Virtual Environment für Openshift
+if RUNS_ON_OPENSHIFT:
 	virtenv = os.environ["OPENSHIFT_PYTHON_DIR"] + "/virtenv/"
 	os.environ["PYTHON_EGG_CACHE"] = os.path.join(virtenv, "lib/python2.6/site-packages")
 	virtualenv = os.path.join(virtenv, "bin/activate_this.py")
@@ -44,18 +46,14 @@ if not LOCAL_DEBUG:
 # line, it's possible required libraries won't be in your searchable path
 #
 
-#
-# Mein Code startet hier
-#
-
-import web # Von web.py auf flask umstellen?
+import web # @TODO Von web.py auf flask umstellen
 import json
 from automatoetry import AutoPoemSpecimen
 
 # Initialisierungsvariablen für web.py
 urls = ("/", "start", "/do", "automatoetry")
 render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
-if not LOCAL_DEBUG:
+if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
 	app = web.application(urls, globals()) # Achtung: erzeugt ImportError, falls kein Symlink application.py -> application existiert
@@ -148,10 +146,7 @@ class automatoetry:
 			Liste von Zeilen).
 		"""
 		global myPoem
-		# @TODO irgendwas stimmt hier und in der POST-Methode nicht. Das Seedwort wird auf das Default-Wort umgestellt, obwohl es sich nicht ändern dürfte.
-		# Jetzt kann ich's nicht mehr reproduzieren. Hmpf.
-		ph = myPoem.getPhenotype()
-		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
+		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
 
 
 	def POST(self):
@@ -163,14 +158,16 @@ class automatoetry:
 		print "/do POST: input ist:", input #DEBUG
 		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
 
+		# @TODO Abfangen, ob beide Kinder wirklich existieren oder ob procreateN aufgrund von libleipzig-Fehlern keine / zu wenige Ergebnisse liefert. Das führt nämlich dazu, dass das überlebende Kind statt mit den Genen des Elter mit Zufallswerten instanziiert wird.
+
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
-			myPoem = AutoPoemSpecimen(myPoem.getChildren()[0].getGenotype())
+			myPoem = myPoem.getChildren()[0]
 		elif input["child"] == "r":
-			myPoem = AutoPoemSpecimen(myPoem.getChildren()[1].getGenotype())
+			myPoem = myPoem.getChildren()[1]
 		# Allererste Generation: nichts machen (Codeblock ist redundant)
-		elif input["child"] == "0":
-			pass
+#		elif input["child"] == "0":
+#			pass
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
 
 		# Kinder erzeugen und als JSON-Objekt zurückgeben
@@ -179,7 +176,7 @@ class automatoetry:
 
 
 if __name__ == '__main__':
-	if not LOCAL_DEBUG: # starte in Openshift-Umgebung
+	if RUNS_ON_OPENSHIFT: # starte ggf. in Openshift-Umgebung
 		from wsgiref.simple_server import make_server
 		httpd = make_server('localhost', 80, application)
 		httpd.serve_forever()

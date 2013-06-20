@@ -188,12 +188,12 @@ class AutoPoemSpecimen:
 #		return self.__developLoremipsum()
 
 
-	def __developLoremipsum(self):
-		""" Gibt ein hartcodiertes Haiku zurück. Gut fürs Debugging oder
-			wenn der Wortschatz-Server nicht erreichbar ist.
+	def __developLoremipsum(self, sleep=0):
+		""" Gibt ein hartcodiertes Haiku mit einer Verzögerung von <sleep> Sekunden zurück.
+			Gut fürs Debugging und wenn der Wortschatz-Server nicht erreichbar ist.
 		"""
-		#import time
-		#time.sleep(.5)
+		import time
+		time.sleep(sleep)
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
@@ -286,10 +286,15 @@ class AutoPoemSpecimen:
 			erreicht ist. Falls nur noch eine Silbe frei ist und die
 			Neighbours-Liste kein einsilbiges Wort enthält, nehme ich "und".
 
-			Die Ergebnisse sind nicht völlig schlecht, aber sehr Substantiv-lastig. Wo
-			kriege ich mehr Verben her?
+			Die Ergebnisse sind nicht völlig schlecht, aber:
+			- @TODO Fehlerbehandlung bei den libleipzig-Aufrufen!
+			- Kinder haben zu wenig Varianz, vor allem bei ungewöhnlichen Seedworten mit
+			wenigen Synonymen.
+			- Oft ist der Phänotyp einer oder beider Kinder identisch mit dem des Elter.
+			- Nicht jede Mutation sorgt für eine sichtbare Veränderung, und wenn es zu Veränderungen kommt, betreffen sie oft die ganze Zeile.
 
-			@TODO Fehlerbehandlung bei den libleipzig-Aufrufen
+			Schöner wäre eine direkte Zuordnung Gen->Silbe, weil dann jede Mutation eine
+			konkrete Phänotypenveränderung hervorrufen würde.
 		"""
 
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
@@ -373,6 +378,12 @@ class AutoPoemSpecimen:
 
 		self.__phenotype = "\n".join(phenotype)
 		return self.__phenotype
+
+
+	def __develop3(self):
+		"""@TODO: Beschreibung fehlt
+		"""
+		pass
 
 
 	def procreate1(self):
