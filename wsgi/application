@@ -46,7 +46,7 @@ urls = (
 	"/do", "automatoetry"
 )
 render = web.template.render('templates/')
-app = web.application(urls, globals()).wsgifunc()
+application = web.application(urls, globals()).wsgifunc()
 
 myPoem = AutoPoemSpecimen()
 
@@ -141,7 +141,7 @@ class automatoetry:
 
 if __name__ == '__main__':
 	from wsgiref.simple_server import make_server
-	httpd = make_server('localhost', 80, app)
+	httpd = make_server('localhost', 80, application)
 	# Wait for a single request, serve it and quit.
 	httpd.handle_request()
 #    app.run()
