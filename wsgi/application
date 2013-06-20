@@ -112,10 +112,8 @@ class automatoetry:
 
 	def GET(self):
 		global myPoem
-
 		ph = myPoem.getPhenotype()
-#		ph = "werd ich hab dich irrst  \n nicht wie unsereiner und \n wie unsereiner" #DEBUG - fester Genotyp (s. start.GET())
-		print "/do GET: Phaenotyp ist\n", ph #DEBUG
+#		print "/do GET: Phaenotyp ist\n", ph #DEBUG
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
 
 	def POST(self):
@@ -142,6 +140,6 @@ class automatoetry:
 if __name__ == '__main__':
 	from wsgiref.simple_server import make_server
 	httpd = make_server('localhost', 80, application)
-	# Wait for a single request, serve it and quit.
-	httpd.handle_request()
+	# Serve requests until the end of time
+	httpd.serve_forever()
 #    app.run()
