@@ -38,7 +38,7 @@ except IOError:
 #
 
 # Mein Code startet hier
-import web.py, string, random, json
+import web, string, random, json
 from automatoetry import AutoPoemSpecimen
 
 urls = (
@@ -46,7 +46,7 @@ urls = (
 	"/do", "automatoetry"
 )
 render = web.template.render('templates/')
-app = web.application(urls, globals())
+app = web.application(urls, globals()).wsgifunc()
 
 myPoem = AutoPoemSpecimen()
 
@@ -140,8 +140,8 @@ class automatoetry:
 
 
 if __name__ == '__main__':
-#	from wsgiref.simple_server import make_server
-#	httpd = make_server('localhost', 80, app)
-#	# Wait for a single request, serve it and quit.
-#	httpd.handle_request()
-    app.run()
+	from wsgiref.simple_server import make_server
+	httpd = make_server('localhost', 80, app)
+	# Wait for a single request, serve it and quit.
+	httpd.handle_request()
+#    app.run()
