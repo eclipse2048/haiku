@@ -113,7 +113,6 @@ class automatoetry:
 	def GET(self):
 		global myPoem
 		ph = myPoem.getPhenotype()
-		print "/do GET: Phaenotyp ist\n", ph #DEBUG
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
 
 	def POST(self):
