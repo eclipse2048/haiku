@@ -33,7 +33,7 @@ VOWELS_DE = u"aeiouyäöü"
 """ Vokale der deutschen Sprache, einschließlich "y" und Umlaute.
 """
 
-ONE_SYLLABLE_COMBINATIONS = [u"aa", u"ae", u"ai", u"ao", u"au", u"ay", u"ee", u"ei", u"eu", u"ey", u"ie", u"ii", u"oe", u"oo", u"ou", u"oy", u"ui", u"uo", u"uu", u"\xe4u"]
+ONE_SYLLABLE_COMBINATIONS = [u"aa", u"ae", u"ai", u"ao", u"au", u"ay", u"ee", u"ei", u"eu", u"ey", u"ie", u"ii", u"oe", u"oo", u"ou", u"oy", u"ue", u"ui", u"uo", u"uu", u"\xe4u"]
 """ Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
 	als einsilbiger Laut behandelt werden.
 """
@@ -288,6 +288,8 @@ class AutoPoemSpecimen:
 
 			Die Ergebnisse sind nicht völlig schlecht, aber sehr Substantiv-lastig. Wo
 			kriege ich mehr Verben her?
+
+			@TODO Fehlerbehandlung bei den libleipzig-Aufrufen
 		"""
 
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []

@@ -9,13 +9,13 @@ $def with (form)
 <!--	@TODO		Favicon? -->
 <!--	@TODO		Weblink zu jQuery? -->
 		<script type="text/javascript" src="/static/jquery-1.10.1.js"></script>
-		<script type="text/javascript">
-			// Script ist kurz genug, dass es nicht in eigene Datei muss
+		<script type="text/javascript">// Script ist kurz genug, dass es nicht in eigene Datei muss
 			jQuery(document).ready(function() {
+
 				// Fokus auf Los-Button setzen
 				jQuery("button.los").focus();
 
-				// Event-Handler für die "Neue/s..."-Buttons erzeugen
+				// Den "Neue/s..."-Buttons Event-Handler zuweisen
 				jQuery("input.button").click(function() {
 					var callButton = jQuery(this).attr("id");
 					jQuery.ajax({
@@ -36,6 +36,15 @@ $def with (form)
 					});
 					return false;
 				});
+
+/*				// Event-Handler für die Warteanimation setzen
+				jQuery("#loading").ajaxStart(function(){
+					console.log("/ AJAX started");
+					jQuery(this).show();
+				}).ajaxStop(function(){
+					console.log("/ AJAX stopped");
+					jQuery(this).hide();
+				}); */
 			});
 		</script>
 	</head>
@@ -43,14 +52,29 @@ $def with (form)
 	<body>
 		<table>
 			<tr>
-				<th>Automatoetry</th> <!-- @TODO warum ist diese Zeile unter den Buttons? -->
+				<th>Automatoetry</th>
 			</tr>
-			<tr/>
-			<form method="post" action="/">
-				<input class="button" type="submit" value="Neues Seedwort" id="newSeedword" />
-				<input class="button" type="submit" value="Neue Gene" id="newGenes" />
-				$:form.render()
-			</form>
 		</table>
+
+		<form method="post" action="/">
+			<table>
+				<tr>
+					<td>
+						<input class="button" type="submit" value="Neues Seedwort" id="newSeedword" />
+						<input class="button" type="submit" value="Neue Gene" id="newGenes" />
+					</td>
+				</tr>
+			</table>
+			$:form.render()
+		</form>
+<!--		<table>
+			<tr>
+				<td>
+					<div align="center" id="loading" style="visibility:hidden">
+						<img src="/static/ajax-loader.gif" />
+					</div>
+				</td>
+			</tr>
+		</table>-->
 	</body>
 </html>
