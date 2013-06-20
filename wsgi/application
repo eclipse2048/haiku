@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  application (haiku web-frontend)
+#  application (web-frontend for Haiku / Automatoetry)
 #
 #  Copyright 2013 Tobias Radloff <mail@tobias-radloff.de>
 #
@@ -22,51 +22,65 @@
 #
 #
 
+from __future__ import division, absolute_import # Aufwärtskompatibilität
+
+LOCAL_DEBUG = True
+""" Gibt an, ob das Programm lokal gestartet werden soll (True) oder auf Openshift (False).
+"""
+
 # OpenShift-Gedöns
 import os
+if not LOCAL_DEBUG:
+	virtenv = os.environ["OPENSHIFT_PYTHON_DIR"] + "/virtenv/"
+	os.environ["PYTHON_EGG_CACHE"] = os.path.join(virtenv, "lib/python2.6/site-packages")
+	virtualenv = os.path.join(virtenv, "bin/activate_this.py")
+	try:
+		execfile(virtualenv, dict(__file__=virtualenv))
+	except IOError:
+		pass
 
-virtenv = os.environ["OPENSHIFT_PYTHON_DIR"] + "/virtenv/"
-os.environ["PYTHON_EGG_CACHE"] = os.path.join(virtenv, "lib/python2.6/site-packages")
-virtualenv = os.path.join(virtenv, "bin/activate_this.py")
-try:
-    execfile(virtualenv, dict(__file__=virtualenv))
-except IOError:
-    pass
 #
 # IMPORTANT: Put any additional includes below this line.  If placed above this
 # line, it's possible required libraries won't be in your searchable path
 #
 
+#
 # Mein Code startet hier
-import web, string, random, json
+#
+
+import web # Von web.py auf flask umstellen?
+import json
 from automatoetry import AutoPoemSpecimen
 
-urls = (
-	"/", "start",
-	"/do", "automatoetry"
-)
+# Initialisierungsvariablen für web.py
+urls = ("/", "start", "/do", "automatoetry")
 render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
-application = web.application(urls, globals()).wsgifunc()
+if not LOCAL_DEBUG:
+	application = web.application(urls, globals()).wsgifunc()
+else:
+	app = web.application(urls, globals()) # Achtung: erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
 myPoem = AutoPoemSpecimen()
 
 class start:
-	""" @TODO: Beschreibung fehlt
+	""" Definiert Formular und GET- und POST-Methoden für die Startwebseite des Projekts,
+		wo der User den Genotyp für Generation 1 bestimmt. Das zugehörige Template ist "templates/start.html".
 	"""
 
-	# Eingabeformular für Seedwort und Gene
-	# Die Buttons für neue Zufallswerte werden im Template hinzugefügt
+
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
 			web.form.notnull,
-			size = 19, # oder 17
+			size = 19,
 			class_ = "textfield",
 			description = "Seedwort:"
 		),
-		web.form.Textbox( # @TODO evtl. drei Textboxen draus machen
+		web.form.Textbox(
 			"genes",
-			web.form.notnull, # @TODO Validator schreiben
+			web.form.notnull,
+			web.form.regexp(r"^[a-z ]*$", "Bitte nur Kleinbuchstaben"),
+			web.form.regexp(r"^[a-z]{5} [a-z]{7} [a-z]{5}$", "Gene müssen 5, 7, 5 Zeichen enthalten, jeweils durch Leerzeichen getrennt"), #
 			size = 19,
 			maxlength = 19,
 			class_ = "textfield",
@@ -77,20 +91,36 @@ class start:
 			class_ = "los"
 		)
 	)
+	""" Eingabeformular für Seedwort und Gene. Buttons für neue Zufallswerte sind nicht
+		definiert, sie werden im Template hinzugefügt (@TODO: wobei sich das evtl.
+		streamlinen ließe).
+	"""
+
 
 	def GET(self):
-		# Hier braucht myPoem nicht global sein, da ich nur die Zufallsroutinen verwende
+		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit Zufallswerten.
+		"""
+
+		# global myPoem ist hier unnötig, da die Instanz unverändert bleibt
 		f = self.form()
 		f["seedword"].set_value(myPoem.createRandomSeedword())
 		f["genes"].set_value(myPoem.createRandomGenes())
 		return render.start(f)
 
+
 	def POST(self):
+		""" Wird von den Buttons auf "templates/start.html" aufgerufen. Je nach
+			Aufrufer wird unterschiedlich verfahren:
+			- Neues Seedwort / Neue Gene: Funktion gibt neue Zufallswerte zurück
+			- Los-Button: Funktion erzeugt myPoem mit den Werten aus dem Formular
+			neu und ruft die Seite "do" auf.
+		"""
+
 		global myPoem
 		input = web.input(Los="")
 		print "/ POST: input ist", input #DEBUG
 
-		# Go-Button: myPoem mit Formularwerten neu erzeugen und Seite "do" aufrufen
+		# "Los"-Button
 		if input["Los"] != "":
 			f = self.form()
 			if not f.validates():
@@ -99,7 +129,7 @@ class start:
 			print "/ POST: Elter lautet", myPoem.getGenotype() #DEBUG
 			raise web.seeother("do")
 
-		# "Neu"-Button: neues Seedwort oder Gene an start.html übergeben
+		# "Neu"-Button: neues Seedwort oder Gene zurückgeben
 		if input["caller"] == "newSeedword":
 			return myPoem.createRandomSeedword()
 		elif input["caller"] == "newGenes":
@@ -107,26 +137,38 @@ class start:
 
 
 class automatoetry:
-	""" @TODO: Beschreibung fehlt
+	""" Definiert GET- und POST-Methoden für die Hauptwebseite des Projekts,
+		wo der User zwischen den Kindern einer Generation entscheidet, welches
+		sich weiter fortpflanzt. Das zugehörige Template ist "templates/automatoetry.html".
 	"""
 
+
 	def GET(self):
+		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück (den Phänotypen als
+			Liste von Zeilen).
+		"""
 		global myPoem
+		# @TODO irgendwas stimmt hier und in der POST-Methode nicht. Das Seedwort wird auf das Default-Wort umgestellt, obwohl es sich nicht ändern dürfte.
+		# Jetzt kann ich's nicht mehr reproduzieren. Hmpf.
 		ph = myPoem.getPhenotype()
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
 
-	def POST(self):
-		global myPoem
 
+	def POST(self):
+		""" Sorgt für den Wechsel zur neuen Generation und gibt deren zwei neue Kinder zurück.
+		"""
+
+		global myPoem
 		input = web.input()
 		print "/do POST: input ist:", input #DEBUG
+		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
 
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
 			myPoem = AutoPoemSpecimen(myPoem.getChildren()[0].getGenotype())
 		elif input["child"] == "r":
 			myPoem = AutoPoemSpecimen(myPoem.getChildren()[1].getGenotype())
-		# Allererste Generation: nichts machen; Codeblock ist redundant
+		# Allererste Generation: nichts machen (Codeblock ist redundant)
 		elif input["child"] == "0":
 			pass
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
@@ -137,8 +179,9 @@ class automatoetry:
 
 
 if __name__ == '__main__':
-	from wsgiref.simple_server import make_server
-	httpd = make_server('localhost', 80, application)
-	# Serve requests until the end of time
-	httpd.serve_forever()
-#    app.run()
+	if not LOCAL_DEBUG: # starte in Openshift-Umgebung
+		from wsgiref.simple_server import make_server
+		httpd = make_server('localhost', 80, application)
+		httpd.serve_forever()
+	else: # starte lokal mit web.py
+		app.run()

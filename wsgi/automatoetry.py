@@ -22,7 +22,9 @@
 #
 #
 
-import string, random
+from __future__ import division, absolute_import # Aufwärtskompatibilität
+import string
+import random
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours
 
 
@@ -36,7 +38,7 @@ ONE_SYLLABLE_COMBINATIONS = [u"aa", u"ae", u"ai", u"ao", u"au", u"ay", u"ee", u"
 	als einsilbiger Laut behandelt werden.
 """
 
-SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, "McDonald's": 3}
+SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3}
 """ Dictionary mit Wörtern, die anders getrennt werden als nach den üblichen
 	Regeln. Bsp: Pi|e|tät statt Pie|tät. Das Wort ist der key, die
 	tatsächliche Silbenzahl der value des Dictionary.

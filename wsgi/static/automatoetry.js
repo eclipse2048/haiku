@@ -9,7 +9,7 @@ jQuery(document).ready( function() {
 		console.log("addTableRow(): Hi"); //DEBUG
 		jQuery("tr.latest")
 			// Kinder nebeneinander in 'latest'-Zeile einfügen (mit Tooltips!)
-			.html("<td title=\"Seedwort: " + jsonData[0][0][0] + "\nGene: " + jsonData[0][0][1] + "\">" + jsonData[0][1] + "</td><td title=\"Seedwort: " + jsonData[1][0][0] + "\nGene: " + jsonData[1][0][1] + "\">" + jsonData[1][1] + "</td>")
+			.html("<td align=\"center\" title=\"Seedwort: " + jsonData[0][0][0] + "\nGene: " + jsonData[0][0][1] + "\">" + jsonData[0][1] + "</td><td align=\"center\" title=\"Seedwort: " + jsonData[1][0][0] + "\nGene: " + jsonData[1][0][1] + "\">" + jsonData[1][1] + "</td>")
 			// tr.latest wird zu tr.older
 			.attr("class", "older")
 			// neue jüngste Tabellenzeile erzeugen
