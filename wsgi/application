@@ -25,9 +25,9 @@
 # OpenShift-Gedöns
 import os
 
-virtenv = os.environ['OPENSHIFT_PYTHON_DIR'] + '/virtenv/'
-os.environ['PYTHON_EGG_CACHE'] = os.path.join(virtenv, 'lib/python2.6/site-packages')
-virtualenv = os.path.join(virtenv, 'bin/activate_this.py')
+virtenv = os.environ["OPENSHIFT_PYTHON_DIR"] + "/virtenv/"
+os.environ["PYTHON_EGG_CACHE"] = os.path.join(virtenv, "lib/python2.6/site-packages")
+virtualenv = os.path.join(virtenv, "bin/activate_this.py")
 try:
     execfile(virtualenv, dict(__file__=virtualenv))
 except IOError:
@@ -45,7 +45,7 @@ urls = (
 	"/", "start",
 	"/do", "automatoetry"
 )
-render = web.template.render('templates/')
+render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
 application = web.application(urls, globals()).wsgifunc()
 
 myPoem = AutoPoemSpecimen()
