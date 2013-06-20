@@ -140,9 +140,8 @@ class automatoetry:
 
 
 if __name__ == '__main__':
-	from wsgiref.simple_server import make_server
-    httpd = make_server('localhost', 80, app)
-    # Wait for a single request, serve it and quit.
-    httpd.handle_request()
-
-#    app.run()
+#	from wsgiref.simple_server import make_server
+#	httpd = make_server('localhost', 80, app)
+#	# Wait for a single request, serve it and quit.
+#	httpd.handle_request()
+    app.run()
