@@ -1,0 +1,56 @@
+$def with (form)
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Automatoetry</title>
+		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
+<!--	@TODO		Favicon? -->
+<!--	@TODO		Weblink zu jQuery? -->
+		<script type="text/javascript" src="/static/jquery-1.10.1.js"></script>
+		<script type="text/javascript">
+			// Script ist kurz genug, dass es nicht in eigene Datei muss
+			jQuery(document).ready(function() {
+				// Fokus auf Los-Button setzen
+				jQuery("button.los").focus();
+
+				// Event-Handler für die "Neue/s..."-Buttons erzeugen
+				jQuery("input.button").click(function() {
+					var callButton = jQuery(this).attr("id");
+					jQuery.ajax({
+						type: "POST",
+						data: {caller: callButton},
+						success: function(data) {
+							switch (callButton) {
+								case "newSeedword":
+									jQuery("input#seedword").val(data);
+									break;
+								case "newGenes":
+									jQuery("input#genes").val(data);
+									break;
+								default:
+									console.log("Fehler in der AJAX Success-function :-(");
+							}
+						},
+					});
+					return false;
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<table>
+			<tr>
+				<th>Automatoetry</th> <!-- @TODO warum ist diese Zeile unter den Buttons? -->
+			</tr>
+			<tr/>
+			<form method="post" action="/">
+				<input class="button" type="submit" value="Neues Seedwort" id="newSeedword" />
+				<input class="button" type="submit" value="Neue Gene" id="newGenes" />
+				$:form.render()
+			</form>
+		</table>
+	</body>
+</html>

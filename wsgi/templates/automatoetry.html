@@ -1,0 +1,31 @@
+$def with (seedword, genes, phenotype)
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Automatoetry</title>
+		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
+<!--	@TODO		Favicon? -->
+<!--	@TODO		Weblink zu jQuery? -->
+		<script type="text/javascript" src="/static/jquery-1.10.1.js"></script>
+		<script type="text/javascript" src="/static/automatoetry.js"></script>
+	</head>
+
+	<body>
+		<table>
+			<tr class="parent">
+				<td colspan="2" align="center" title="Seedwort: $seedword&#10;Gene: $genes">
+					$for line in phenotype:
+						$line <br />
+				</td>
+			</tr>
+			<tr class="empty"><br/></tr>
+			<tr class="latest">
+				<td colspan="2" align="center">
+					<div align="center" id="loading"><img src="/static/ajax-loader.gif" /></div>
+				</td>
+			</tr>
+		</table>
+	</body>
+</html>

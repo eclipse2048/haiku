@@ -1,10 +1,14 @@
 from setuptools import setup
 
-setup(name='YourAppName',
-      version='1.0',
-      description='OpenShift App',
-      author='Your Name',
-      author_email='example@example.com',
-      url='http://www.python.org/sigs/distutils-sig/',
-#      install_requires=['Django>=1.3'],
-     )
+setup(
+	name = "Tobias Radloff",
+	version = "1.0",
+	description = "Automatoetry - Automatized Haiku Poetry with genetic algorithms and Python",
+	author = "Tobias Radloff",
+	author_email = "mail@tobias-radloff.de",
+	url = "http://www.python.org/sigs/distutils-sig/",
+	install_requires = [
+		'web.py',
+		'libleipzig',
+	],
+)
