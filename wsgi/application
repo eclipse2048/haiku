@@ -115,7 +115,7 @@ class automatoetry:
 
 		ph = myPoem.getPhenotype()
 #		ph = "werd ich hab dich irrst  \n nicht wie unsereiner und \n wie unsereiner" #DEBUG - fester Genotyp (s. start.GET())
-		print "/do GET: Phänotyp ist\n", ph #DEBUG
+		print "/do GET: Phaenotyp ist\n", ph #DEBUG
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], ph.split("\n"))
 
 	def POST(self):
