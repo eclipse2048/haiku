@@ -66,6 +66,7 @@ class start:
 
 	# @TODO: Auswahlkästchen für die Developfkt. hinzufügen
 	form = web.form.Form(
+		# @TODO: Wenn ich mit dem Cursor im Seedwort-Feld Return drücke, soll der Los-Button ausgelöst werden und nicht wie im Moment "Neues Seedwort"
 		web.form.Textbox(
 			"seedword",
 			web.form.notnull,

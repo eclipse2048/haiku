@@ -87,7 +87,7 @@ class AutoPoemSpecimen:
 		"""	Gibt ein zufälliges Startwort zurück.
 		"""
 		# @TODO zufälliges Seedwort erzeugen statt hartcodiertes verwenden
-		return "laufen"
+		return "Vogel"
 
 
 	def getGenotype(self):
@@ -203,24 +203,21 @@ class AutoPoemSpecimen:
 		else:
 			# @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 			funcName = "LR575Syllables" # default
-		print "Calling develop function '" + funcName + "()'" #DEBUG
+#		print "Calling develop function '" + funcName + "()'" #DEBUG
 
 		# Funktion ausführen und Fehler abfangen
-		try:
-			return getattr(self, funcPrefix + funcName).__call__()
-		except:
-#			errorType, errorInstance, traceback = sys.exc_info()
-			print sys.exc_info() #DEBUG
-			raise #HaikuError from sys.exc_info()[1]
+#		try:
+		return getattr(self, funcPrefix + funcName).__call__()
+#		except:
+##			errorType, errorInstance, traceback = sys.exc_info()
+#			print sys.exc_info() #DEBUG
+#			raise #HaikuError from sys.exc_info()[1]
 
 
 	def __developLoremipsum(self):
 		""" Gibt ein hartcodiertes Haiku zurück. Gut fürs Debugging und wenn der
 			Wortschatz-Server nicht erreichbar ist.
 		"""
-		import time # DEBUG
-		time.sleep(sleep) # DEBUG
-
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
@@ -326,8 +323,7 @@ class AutoPoemSpecimen:
 
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
 
-		# Position des Seedworts in der jeweiligen Zeile ermitteln.
-		# Zurzeit nehme ich die Position des Gens mit dem höchsten Wert
+		# Position des Seedworts in der jeweiligen Zeile ermitteln. Zurzeit nehme ich die Position des Gens mit dem höchsten Wert
 		for i in range(3):
 			seedwordPos.append(geneLines[i].index(max(geneLines[i])))
 
@@ -345,11 +341,11 @@ class AutoPoemSpecimen:
 				words = Thesaurus(self.getGenotype()[0], g) # hole g Worte via Thesaurus
 				while len(words) > 0:
 					j = len(words) % g - 1
-					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+#					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					seedword = words.pop(j)[0] # words[j] ist eine Liste mit dem Synonymwort an Pos. 0
 					if self.countSyllables(seedword) > 0:
 						break
-			print "Das Seedwort lautet", seedword #DEBUG
+#			print "Das Seedwort lautet", seedword #DEBUG
 
 
 			# Zahl der freien Silben rechts und links errechnen
@@ -362,7 +358,7 @@ class AutoPoemSpecimen:
 				freeSyllablesRight = syllableNo - s - seedwordPos[i]
 			freeSyllablesLeft = seedwordPos[i]
 
-			#print syllableNo, seedwordPos[i], freeSyllablesRight, freeSyllablesLeft #DEBUG
+#			print syllableNo, seedwordPos[i], freeSyllablesRight, freeSyllablesLeft #DEBUG
 
 			# Zeile nach links vervollständigen
 			while freeSyllablesLeft > 0:
@@ -371,19 +367,19 @@ class AutoPoemSpecimen:
 				words = LeftNeighbours(line.split()[0], g)
 				while len(words) > 0:
 					j = len(words) % g - 1
-					print "Zeile", i, ", links: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+#					print "Zeile", i, ", links: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					tmpWord = words.pop(j)[0] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 0
-					#print "tmpWort links lautet", tmpWord, "und hat", self.countSyllables(tmpWord), "Silben" #DEBUG
+#					print "tmpWort links lautet", tmpWord, "und hat", self.countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
 					if lTmp > freeSyllablesLeft or lTmp == 0:
 						continue
 					else:
 						word = tmpWord
 						break
-				#print "lWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
+#				print "lWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				freeSyllablesLeft -= self.countSyllables(word)
 				line = word + " " + line
-				print line, freeSyllablesLeft #DEBUG
+#				print line, freeSyllablesLeft #DEBUG
 
 			# Zeile nach rechts vervollständigen
 			while freeSyllablesRight > 0:
@@ -392,7 +388,7 @@ class AutoPoemSpecimen:
 				words = RightNeighbours(line.split()[-1], g)
 				while len(words) > 0:
 					j = len(words) % g - 1
-					print "Zeile", i, ", rechts: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+#					print "Zeile", i, ", rechts: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					tmpWord = words.pop(j)[1] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 1
 					#print "tmpWort rechts lautet", tmpWord, "und hat", countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
@@ -401,10 +397,10 @@ class AutoPoemSpecimen:
 					else:
 						word = tmpWord
 						break
-				#print "rWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
+#				print "rWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				line = line + " " + word
 				freeSyllablesRight -= self.countSyllables(word)
-				print line, freeSyllablesRight #DEBUG
+#				print line, freeSyllablesRight #DEBUG
 
 			phenotype.append(line)
 
