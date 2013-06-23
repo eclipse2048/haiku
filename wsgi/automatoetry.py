@@ -461,6 +461,8 @@ class AutoPoemSpecimen:
 
 		# Kinder 2 bis n
 		for i in range(litterSize - 1):
+
+			# So lange weitere Kinder erzeugen, bis keine zwei gleich sind
 			while True:
 				newChild = self.procreate1()
 				isDistinct = True
@@ -469,7 +471,9 @@ class AutoPoemSpecimen:
 				# @TODO Phänotypen miteinander vergleichen statt wie im Moment nur die Genotypen
 				for j in range(len(self.__children)):
 					if newChild.getGenotype()[1] == self.__children[j].getGenotype()[1]:
+						# @TODO: Was tun, wenn die Varianz der Develop-Fkt. keine Varianz erzeugt, d.h. alle Kinder sind gleich und die while-Schleife nie endet?
 						isDistinct = False
+						print "Leider keine unterschiedlichen Kinder. Der Genotyp ist", newChild.getGenotype() #DEBUG
 						break
 						# @TODO Bei bestimmten Seedworten ist die Haiku-Varianz so gering,
 						# dass alle Kinder gleich sind und die while-Schleife nie endet. Hmpf.

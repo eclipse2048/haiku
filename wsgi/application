@@ -56,8 +56,9 @@ else:
 
 # globale Haiku-Instanz
 myPoem = AutoPoemSpecimen()
-print "Die globals() lauten:\n", globals()
 
+#DEBUG
+print "module here:", myPoem
 
 class start:
 	""" Definiert Formular und GET- und POST-Methoden für die Startwebseite des Projekts,
@@ -98,6 +99,12 @@ class start:
 	def GET(self):
 		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit Zufallswerten.
 		"""
+		#DEBUG
+		print "/ GET: Ist myPoem in globals()?", globals().has_key("myPoem")
+		print "/ GET: Ist myPoem in locals()?", locals().has_key("myPoem")
+		global myPoem
+		print "/ GET: Und jetzt?", locals().has_key("myPoem")
+		print "/ GET here:", myPoem
 
 		# global myPoem ist hier unnötig, da die Instanz unverändert bleibt
 		f = self.form()
@@ -145,7 +152,12 @@ class automatoetry:
 		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück (den Phänotypen als
 			Liste von Zeilen).
 		"""
+		#DEBUG
+		print "/ GET: Ist myPoem in globals()?", globals().has_key("myPoem")
 		global myPoem
+		print "/ GET: Und jetzt?", myPoem in globals()
+
+#		global myPoem
 		print "/do GET: Genotyp ist", myPoem.getGenotype()
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
 
@@ -160,8 +172,6 @@ class automatoetry:
 		print "/do POST: input ist:", input #DEBUG
 		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
 
-		# @TODO Abfangen, ob weniger als zwei Kinder existieren, falls procreateN aufgrund von libleipzig-Fehlern keine / zu wenige Ergebnisse liefert. In dem Fall wird das überlebende Kind statt mit den Genen des Elter mit Zufallswerten instanziiert.
-
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
 			myPoem = myPoem.getChildren()[0]
@@ -174,6 +184,7 @@ class automatoetry:
 
 		# Kinder erzeugen und als JSON-Objekt zurückgeben
 		children = myPoem.procreateN(2)
+		print "/do POST: Kinder sind erzeugt" #DEBUG
 		return json.dumps([[child.getGenotype(), child.getPhenotype().replace("\n", "<br/>")] for child in children])
 
 
