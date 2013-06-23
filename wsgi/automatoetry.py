@@ -25,6 +25,7 @@
 from __future__ import division, absolute_import # Aufwärtskompatibilität
 import string
 import random
+import sys
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours
 # @TODO: Wortschatz-Credentials für die libleipzig-Methoden benutzen, zB Thesaurus("Wort", auth=("username", "password"))
 
@@ -44,6 +45,12 @@ SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3}
 	Regeln. Bsp: Pi|e|tät statt Pie|tät. Das Wort ist der key, die
 	tatsächliche Silbenzahl der value des Dictionary.
 """
+
+
+class HaikuError(Exception):
+	""" @TODO: Beschreibung fehlt
+	"""
+	pass
 
 
 class AutoPoemSpecimen:
@@ -93,7 +100,7 @@ class AutoPoemSpecimen:
 		""" @TODO: Beschreibung fehlt
 		"""
 		if self.__phenotype == "":
-			self.__phenotype = self.__develop() # @TODO libleipzig-errors abfangen
+			self.__phenotype = self.__develop()
 		return self.__phenotype
 
 
@@ -183,20 +190,28 @@ class AutoPoemSpecimen:
 
 	def __develop(self, function=""):
 		""" Dummy-Funktion. Ruft die __develop-Funktion auf, deren Restname als Parameter
-			übergeben wird.
-
-			__develop() als Dummy ermöglicht es, unterschiedliche Phänotyp-
+			übergeben wird. __develop() als Dummy ermöglicht es, unterschiedliche Phänotyp-
 			Algorithmen zu verwenden, ohne den Code zu verändern (Ausnahme: Default-Fkt.).
+
+			Tritt beim Funktionsaufruf ein Fehler auf, wird ein HaikuError von der
+			auslösenden Fehlerinstanz erzeugt und nach oben weitergegeben.
 		"""
 
 		functions, funcPrefix = self.getFunctionNames(), "_" + self.__class__.__name__ + "__develop"
 		if function in functions:
 			funcName = function
 		else:
+			# @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 			funcName = "LR575Syllables" # default
 		print "Calling develop function '" + funcName + "()'" #DEBUG
-		# @TODO: Fehler abfangen
-		return getattr(self, funcPrefix + funcName).__call__()
+
+		# Funktion ausführen und Fehler abfangen
+		try:
+			return getattr(self, funcPrefix + funcName).__call__()
+		except:
+#			errorType, errorInstance, traceback = sys.exc_info()
+			print sys.exc_info() #DEBUG
+			raise #HaikuError from sys.exc_info()[1]
 
 
 	def __developLoremipsum(self):

@@ -44,7 +44,7 @@ if RUNS_ON_OPENSHIFT:
 # Zusätzliche Module erst ab hier importieren (wg. Openshift virtual environment)
 import web # @TODO Von web.py auf flask umstellen
 import json
-from automatoetry import AutoPoemSpecimen
+from automatoetry import AutoPoemSpecimen#, HaikuError
 
 # Initialisierungsvariablen für web.py
 urls = ("/", "start", "/do", "automatoetry")
@@ -56,6 +56,7 @@ else:
 
 # globale Haiku-Instanz
 myPoem = AutoPoemSpecimen()
+print "Die globals() lauten:\n", globals()
 
 
 class start:
@@ -145,6 +146,7 @@ class automatoetry:
 			Liste von Zeilen).
 		"""
 		global myPoem
+		print "/do GET: Genotyp ist", myPoem.getGenotype()
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
 
 
