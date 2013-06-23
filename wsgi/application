@@ -57,8 +57,6 @@ else:
 # globale Haiku-Instanz
 myPoem = AutoPoemSpecimen()
 
-#DEBUG
-print "module here:", myPoem
 
 class start:
 	""" Definiert Formular und GET- und POST-Methoden für die Startwebseite des Projekts,
@@ -99,13 +97,6 @@ class start:
 	def GET(self):
 		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit Zufallswerten.
 		"""
-		#DEBUG
-		print "/ GET: Ist myPoem in globals()?", globals().has_key("myPoem")
-		print "/ GET: Ist myPoem in locals()?", locals().has_key("myPoem")
-		global myPoem
-		print "/ GET: Und jetzt?", locals().has_key("myPoem")
-		print "/ GET here:", myPoem
-
 		# global myPoem ist hier unnötig, da die Instanz unverändert bleibt
 		f = self.form()
 		f["seedword"].set_value(myPoem.createRandomSeedword())
@@ -152,13 +143,8 @@ class automatoetry:
 		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück (den Phänotypen als
 			Liste von Zeilen).
 		"""
-		#DEBUG
-		print "/ GET: Ist myPoem in globals()?", globals().has_key("myPoem")
 		global myPoem
-		print "/ GET: Und jetzt?", myPoem in globals()
-
-#		global myPoem
-		print "/do GET: Genotyp ist", myPoem.getGenotype()
+		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
 
 
@@ -177,9 +163,6 @@ class automatoetry:
 			myPoem = myPoem.getChildren()[0]
 		elif input["child"] == "r":
 			myPoem = myPoem.getChildren()[1]
-		# Allererste Generation: nichts machen (Codeblock ist redundant)
-#		elif input["child"] == "0":
-#			pass
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
 
 		# Kinder erzeugen und als JSON-Objekt zurückgeben

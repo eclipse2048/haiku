@@ -441,8 +441,8 @@ class AutoPoemSpecimen:
 			mutatedGene = "a"
 
 		mutatedGenes = genes[:i] + mutatedGene + genes[i+1:]
-		# @TODO Phänotyp mit dem des Elter vergleichen
-		return AutoPoemSpecimen([newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:]], self)
+		# @TODO Sollte ich den Phänotyp mit dem des Elter abgleichen, um identische Phänotypen zu vermeiden? Andererseits würde ich damit Mutationssprünge von mehr als einem Gen und +/-1 unmöglich machen
+		return AutoPoemSpecimen(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self)
 
 
 	def procreateN(self, litterSize=2):
