@@ -26,6 +26,7 @@ from __future__ import division, absolute_import # Aufwärtskompatibilität
 import string
 import random
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours
+# @TODO: Wortschatz-Credentials für die libleipzig-Methoden benutzen, zB Thesaurus("Wort", auth=("username", "password"))
 
 
 # Konstanten für die Silbenzählung
@@ -56,26 +57,22 @@ class AutoPoemSpecimen:
 		die letzten fünf mit Zeile 3 und die mittleren sieben mit Zeile 2.
 	"""
 
-	def __init__(self, genotype=None, parent=None, phenotype=""):
+	def __init__(self, seedword=None, genes=None, parent=None, phenotype=""):
 		""" @TODO: Beschreibung einfügen
 		"""
-
-		if genotype != None:
-			# @TODO: Übergebene Gene auf len==17 und ascii_lowercase überprüfen
-			self.__seedword, self.__genes = genotype[0], genotype[1]
-		else:
-			self.__seedword, self.__genes = self.createRandomSeedword(), self.createRandomGenes()
-		self.__phenotype = phenotype # @TODO hier am besten gleich den Phänotyp erzeugen; hängt aber davon ab, wie lange die Fkt. braucht
-		self.__parent, self.__children = parent, []
+		self.__seedword = seedword or self.createRandomSeedword() # @TODO: Seedwort auf String (und Duden?) überprüfen
+		# @TODO: Übergebene Gene auf len==17 und ascii_lowercase überprüfen: r"^[a-z]{5} [a-z]{7} [a-z]{5}$"
+		self.__genes = genes or self.createRandomGenes()
+		self.__parent = parent
+		self.__children = []
+		self.__phenotype = phenotype # @TODO hier am besten gleich den Phänotyp erzeugen; hängt aber davon ab, wie lange die Fkt. braucht. Nur weil die Develop-Funktionen z.T. so lange brauchen, gibt es überhaupt die Möglichkeit, dem Konstruktor den Phänotpyen zu übergeben.
 
 
 	def createRandomGenes(self):
 		"""	Erzeugt die Gene für ein zufälliges Exemplar. Nützlich für die
-			Erzeugung einer Startpopulation in Generation 1.
+			Erzeugung eines Startindividuums in Generation 1.
 		"""
-		genes = ""
-		for i in range(17):
-			genes += random.choice(string.ascii_lowercase)
+		genes = "".join([random.choice(string.ascii_lowercase) for i in range(17)])
 		return genes[:5] + " " + genes[5:12] + " " + genes[12:]
 
 
@@ -84,6 +81,7 @@ class AutoPoemSpecimen:
 		"""
 		# @TODO zufälliges Seedwort erzeugen statt hartcodiertes verwenden
 		return "laufen"
+
 
 	def getGenotype(self):
 		""" @TODO: Beschreibung fehlt
@@ -160,55 +158,69 @@ class AutoPoemSpecimen:
 		if word in SYLLABLE_COUNT_EXCEPTIONS.keys():
 			return SYLLABLE_COUNT_EXCEPTIONS[word]
 
-		# hat libleipzig merere Worte als ein einzelnes zurückgegeben?
+		# Manchmal gibt libleipzig merere Worte als ein einzelnes zurück
 		if " " in word:
-			words, s = word.split(), 0
-			for w in words:
-				s += self.__sylCount(list(w.strip().lower()))
-			return s
+			return sum([self.__sylCount(list(w.strip().lower())) for w in word.split()])
 
 		# Wort in Liste von Kleinbuchstaben umwandeln und ab dafür
 		return self.__sylCount(list(word.strip().lower()))
 
 
 	def __char2int(self, c):
-		"""	Gibt die Position eines Zeichens aus string.ascii_lowercase zurück
+		"""	Gibt die Position des übergebenen Buchstabens im Alphabet zurück, bzw. 0,
+			falls c kein Buchstabe ist.
 		"""
-		return string.ascii_lowercase.index(c)
+		return string.ascii_lowercase.find(c.lower()) + 1
 
 
-	def __develop(self):
-		""" Dummy-Funktion. Ruft die aktuelle develop-Funktion auf.
-
-			develop() als Dummy ermöglicht es, unterschiedliche Phänotyp-
-			Algorithmen zu verwenden, ohne dass dabei mehr als ein einziger
-			(nämlich dieser) Funktionsaufruf im Code geändert werden muss.
+	def getFunctionNames(self):
+		"""@TODO: Beschreibung fehlt
 		"""
-		return self.__develop2()
-#		return self.__developLoremipsum()
+		classPrefix = "_" + self.__class__.__name__ + "__develop"
+		l = len(classPrefix)
+		return [f[l:] for f in dir(self) if f.startswith(classPrefix) and len(f) > l]
 
 
-	def __developLoremipsum(self, sleep=0):
-		""" Gibt ein hartcodiertes Haiku mit einer Verzögerung von <sleep> Sekunden zurück.
-			Gut fürs Debugging und wenn der Wortschatz-Server nicht erreichbar ist.
+	def __develop(self, function=""):
+		""" Dummy-Funktion. Ruft die __develop-Funktion auf, deren Restname als Parameter
+			übergeben wird.
+
+			__develop() als Dummy ermöglicht es, unterschiedliche Phänotyp-
+			Algorithmen zu verwenden, ohne den Code zu verändern (Ausnahme: Default-Fkt.).
 		"""
-		import time
-		time.sleep(sleep)
+
+		functions, funcPrefix = self.getFunctionNames(), "_" + self.__class__.__name__ + "__develop"
+		if function in functions:
+			funcName = function
+		else:
+			funcName = "LR575Syllables" # default
+		print "Calling develop function '" + funcName + "()'" #DEBUG
+		# @TODO: Fehler abfangen
+		return getattr(self, funcPrefix + funcName).__call__()
+
+
+	def __developLoremipsum(self):
+		""" Gibt ein hartcodiertes Haiku zurück. Gut fürs Debugging und wenn der
+			Wortschatz-Server nicht erreichbar ist.
+		"""
+		import time # DEBUG
+		time.sleep(sleep) # DEBUG
+
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
 	# Funktion ist kaputt
-	def __develop1(self, genotype=[]):
+	def __developLR575Words(self, genotype=[]):
 		"""	Erzeugt aus einem Genotyp den dazugehörigen Phänotyp. Hier findet der
 			schwierige Teil des gesamten Programms statt.
 
 			Die Funktion entwickelt den übergebenen Genotypen. Wird kein Genotyp
 			übergeben, nimmt sie den Genotyp der eigenen Instanz.
 
-			__develop1() erzeugt ein Haiku, das anstatt aus 5-7-5 Silben aus 5-7-5
-			Wörtern besteht. In jeder Zeile wird das Seedwort ermittelt und an die
-			richtige Stelle gesetzt, danach wird die Zeile nach links und nach
-			rechts mit Left/RightNeighbours aufgefüllt.
+			__developLR575Words() erzeugt ein Haiku, das anstatt aus 5-7-5 Silben
+			aus 5-7-5 Wörtern besteht. In jeder Zeile wird das Seedwort ermittelt
+			und an die richtige Stelle gesetzt, danach wird die Zeile nach links
+			und nach rechts mit Left/RightNeighbours aufgefüllt.
 		"""
 
 		if genotype == []:
@@ -278,20 +290,20 @@ class AutoPoemSpecimen:
 		return p
 
 
-	def __develop2(self):
-		"""	__develop2() erzeugt ein Haiku aus 5-7-5 Silben. Wie bei __develop1() wird
-			in jeder Zeile das Seedwort ermittelt und an die entsprechende Stelle
-			gesetzt. Danach wird die Zeile nach links und rechts mit
-			Left/RightNeighbours aufgefüllt, bis die gewünschte Silbenanzahl
-			erreicht ist. Falls nur noch eine Silbe frei ist und die
-			Neighbours-Liste kein einsilbiges Wort enthält, nehme ich "und".
+	def __developLR575Syllables(self):
+		"""	__developLR575Syllables() erzeugt ein Haiku aus 5-7-5 Silben. Wie bei
+			__developLR575Words() wird in jeder Zeile das Seedwort ermittelt und an die
+			entsprechende Stelle gesetzt. Danach wird die Zeile nach links und rechts mit
+			Left/RightNeighbours aufgefüllt, bis die gewünschte Silbenanzahl erreicht
+			ist. Falls nur noch eine Silbe frei ist und die Neighbours-Liste kein
+			einsilbiges Wort enthält, nehme ich "und".
 
 			Die Ergebnisse sind nicht völlig schlecht, aber:
-			- @TODO Fehlerbehandlung bei den libleipzig-Aufrufen!
 			- Kinder haben zu wenig Varianz, vor allem bei ungewöhnlichen Seedworten mit
 			wenigen Synonymen.
 			- Oft ist der Phänotyp einer oder beider Kinder identisch mit dem des Elter.
-			- Nicht jede Mutation sorgt für eine sichtbare Veränderung, und wenn es zu Veränderungen kommt, betreffen sie oft die ganze Zeile.
+			- Nicht jede Mutation sorgt für eine sichtbare Veränderung, und wenn es zu
+			Veränderungen kommt, betreffen sie oft die ganze Zeile.
 
 			Schöner wäre eine direkte Zuordnung Gen->Silbe, weil dann jede Mutation eine
 			konkrete Phänotypenveränderung hervorrufen würde.
@@ -312,23 +324,22 @@ class AutoPoemSpecimen:
 				syllableNo = 5
 
 			# Seedwort finden
-			seedword = "Haus" # Fallback @TODO: eleganter lösen
-			if i == 0:
-				seedword = self.getGenotype()[0]
-			else:
+			seedword = self.getGenotype()[0] # Zeile 0 und default
+			if i != 0:
 				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # nimmt das nicht benutzte Gen aus der vorigen Zeile, um das Seedwort dieser Zeile zu erzeugen
-				words = Thesaurus(self.getGenotype()[0], g) # das g-te Thesaurusergebnis wird Seedwort
+				words = Thesaurus(self.getGenotype()[0], g) # hole g Worte via Thesaurus
 				while len(words) > 0:
-					seedword = words.pop()[0] # Thesaurus stellt das Synonymwort im Ergebnis an Pos. 0
+					j = len(words) % g - 1
+					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+					seedword = words.pop(j)[0] # words[j] ist eine Liste mit dem Synonymwort an Pos. 0
 					if self.countSyllables(seedword) > 0:
 						break
-			#print "Das Seedwort lautet", seedword #DEBUG
+			print "Das Seedwort lautet", seedword #DEBUG
 
-			line = seedword
 
 			# Zahl der freien Silben rechts und links errechnen
 			# @TODO: Was tun, wenn Seedwort zu lang für die Zeile?
-			s = self.countSyllables(seedword)
+			line, s = seedword, self.countSyllables(seedword)
 			if s + seedwordPos[i] > syllableNo:
 				freeSyllablesRight = 0
 				seedwordPos[i] = syllableNo - s
@@ -341,10 +352,13 @@ class AutoPoemSpecimen:
 			# Zeile nach links vervollständigen
 			while freeSyllablesLeft > 0:
 				word = "und"
-				words = LeftNeighbours(line.split()[0], self.__char2int(geneLines[i][freeSyllablesLeft-1]))
+				g = self.__char2int(geneLines[i][freeSyllablesLeft-1])
+				words = LeftNeighbours(line.split()[0], g)
 				while len(words) > 0:
-					tmpWord = words.pop()[0] # LeftNeighbours stellt das Nachbarwort im Ergebnis an Pos. 0
-					#print "tmpWort links lautet", tmpWord, "und hat", countSyllables(tmpWord), "Silben" #DEBUG
+					j = len(words) % g - 1
+					print "Zeile", i, ", links: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+					tmpWord = words.pop(j)[0] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 0
+					#print "tmpWort links lautet", tmpWord, "und hat", self.countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
 					if lTmp > freeSyllablesLeft or lTmp == 0:
 						continue
@@ -354,14 +368,17 @@ class AutoPoemSpecimen:
 				#print "lWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				freeSyllablesLeft -= self.countSyllables(word)
 				line = word + " " + line
-				#print line, freeSyllablesLeft #DEBUG
+				print line, freeSyllablesLeft #DEBUG
 
 			# Zeile nach rechts vervollständigen
 			while freeSyllablesRight > 0:
 				word = "und"
-				words = RightNeighbours(line.split()[-1], self.__char2int(geneLines[i][syllableNo-freeSyllablesRight]))
+				g = self.__char2int(geneLines[i][syllableNo-freeSyllablesRight])
+				words = RightNeighbours(line.split()[-1], g)
 				while len(words) > 0:
-					tmpWord = words.pop()[1] # RightNeighbours stellt das Nachbarwort im Ergebnis an Pos. 1
+					j = len(words) % g - 1
+					print "Zeile", i, ", rechts: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j
+					tmpWord = words.pop(j)[1] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 1
 					#print "tmpWort rechts lautet", tmpWord, "und hat", countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
 					if lTmp > freeSyllablesRight or lTmp == 0:
@@ -372,7 +389,7 @@ class AutoPoemSpecimen:
 				#print "rWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				line = line + " " + word
 				freeSyllablesRight -= self.countSyllables(word)
-				#print line, freeSyllablesRight #DEBUG
+				print line, freeSyllablesRight #DEBUG
 
 			phenotype.append(line)
 
@@ -484,14 +501,13 @@ def main():
 	print "Genotyp: ", myPoem.getGenotype()
 	print "\nPhänotyp:\n\n", myPoem.getPhenotype()
 
-	while True: # dieser Block fkt. so nicht mehr
-		children = myPoem.procreateN([], 2)
-		newGeneration = chooseNewGeneration(myPoem, children)
-		print "Die naechste Generation lautet: \n" + newGeneration[2] + "!\n" # fkt. das so? siehe Kommentar bei enableNextGeneration
-		myPoem.enableNextGeneration(newGeneration)
+#	while True: # dieser Block fkt. so nicht mehr
+#		children = myPoem.procreateN([], 2)
+#		newGeneration = chooseNewGeneration(myPoem, children)
+#		print "Die naechste Generation lautet: \n" + newGeneration[2] + "!\n" # fkt. das so? siehe Kommentar bei enableNextGeneration
+#		myPoem.enableNextGeneration(newGeneration)
 
 	return 0
 
 if __name__ == '__main__':
 	main()
-

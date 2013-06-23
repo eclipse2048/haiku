@@ -26,7 +26,7 @@ from __future__ import division, absolute_import # Aufwärtskompatibilität
 import os
 
 # lokal oder Openshift?
-if os.environ.has_key("OPENSHIFT_PYTHON_DIR"]:
+if os.environ.has_key("OPENSHIFT_PYTHON_DIR"):
 	RUNS_ON_OPENSHIFT = True
 else:
 	RUNS_ON_OPENSHIFT = False
@@ -41,11 +41,7 @@ if RUNS_ON_OPENSHIFT:
 	except IOError:
 		pass
 
-#
-# IMPORTANT: Put any additional includes below this line.  If placed above this
-# line, it's possible required libraries won't be in your searchable path
-#
-
+# Zusätzliche Module erst ab hier importieren (wg. Openshift virtual environment)
 import web # @TODO Von web.py auf flask umstellen
 import json
 from automatoetry import AutoPoemSpecimen
@@ -58,7 +54,9 @@ if RUNS_ON_OPENSHIFT:
 else:
 	app = web.application(urls, globals()) # Achtung: erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
+# globale Haiku-Instanz
 myPoem = AutoPoemSpecimen()
+
 
 class start:
 	""" Definiert Formular und GET- und POST-Methoden für die Startwebseite des Projekts,
@@ -66,6 +64,7 @@ class start:
 	"""
 
 
+	# @TODO: Auswahlkästchen für die Developfkt. hinzufügen
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
@@ -111,7 +110,7 @@ class start:
 			Aufrufer wird unterschiedlich verfahren:
 			- Neues Seedwort / Neue Gene: Funktion gibt neue Zufallswerte zurück
 			- Los-Button: Funktion erzeugt myPoem mit den Werten aus dem Formular
-			neu und ruft die Seite "do" auf.
+			neu und ruft Seite "do" auf.
 		"""
 
 		global myPoem
@@ -123,7 +122,7 @@ class start:
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
-			myPoem = AutoPoemSpecimen([f.d.seedword, f.d.genes])
+			myPoem = AutoPoemSpecimen(f.d.seedword, f.d.genes)
 			print "/ POST: Elter lautet", myPoem.getGenotype() #DEBUG
 			raise web.seeother("do")
 
@@ -150,7 +149,8 @@ class automatoetry:
 
 
 	def POST(self):
-		""" Sorgt für den Wechsel zur neuen Generation und gibt deren zwei neue Kinder zurück.
+		""" Erledigt POST-Requests. Sorgt für den Wechsel zur neuen Generation und
+			gibt die zwei neue Kinder zurück.
 		"""
 
 		global myPoem
@@ -158,7 +158,7 @@ class automatoetry:
 		print "/do POST: input ist:", input #DEBUG
 		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
 
-		# @TODO Abfangen, ob beide Kinder wirklich existieren oder ob procreateN aufgrund von libleipzig-Fehlern keine / zu wenige Ergebnisse liefert. Das führt nämlich dazu, dass das überlebende Kind statt mit den Genen des Elter mit Zufallswerten instanziiert wird.
+		# @TODO Abfangen, ob weniger als zwei Kinder existieren, falls procreateN aufgrund von libleipzig-Fehlern keine / zu wenige Ergebnisse liefert. In dem Fall wird das überlebende Kind statt mit den Genen des Elter mit Zufallswerten instanziiert.
 
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
@@ -176,7 +176,7 @@ class automatoetry:
 
 
 if __name__ == '__main__':
-	if RUNS_ON_OPENSHIFT: # starte ggf. in Openshift-Umgebung
+	if RUNS_ON_OPENSHIFT:
 		from wsgiref.simple_server import make_server
 		httpd = make_server('localhost', 80, application)
 		httpd.serve_forever()
