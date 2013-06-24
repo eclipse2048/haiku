@@ -45,6 +45,9 @@ if RUNS_ON_OPENSHIFT:
 import web # @TODO Von web.py auf flask umstellen
 import json
 from automatoetry import AutoPoemSpecimen, HaikuError
+print "application: checking for Wortschatz env. vars"
+print "USER:", os.environ.has_key("WORTSCHATZ_USER")
+print "Password:", os.environ.has_key("WORTSCHATZ_PASSWORD")
 
 # Initialisierungsvariablen für web.py
 urls = ("/", "start", "/do", "automatoetry")

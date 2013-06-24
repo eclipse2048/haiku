@@ -145,10 +145,6 @@ class AutoPoemSpecimen:
 		return self.__phenotype
 
 
-
-
-
-
 	def getParent(self):
 		""" @TODO: Beschreibung fehlt
 		"""
