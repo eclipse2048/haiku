@@ -26,8 +26,15 @@ from __future__ import division, absolute_import # Aufwärtskompatibilität
 import string
 import random
 import sys
+import traceback
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours
-# @TODO: Wortschatz-Credentials für die libleipzig-Methoden benutzen, zB Thesaurus("Wort", auth=("username", "password"))
+
+# Credentials für die Wortschatz-API einlesen
+# Wenn kein Modul wortschatz.py mit eigenen Credentials existiert, wird der anonyme Zugang verwendet
+try:
+	from wortschatz import WORTSCHATZ_CREDENTIALS
+except ImportError:
+	WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
 
 
 # Konstanten für die Silbenzählung
@@ -50,7 +57,14 @@ SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3}
 class HaikuError(Exception):
 	""" @TODO: Beschreibung fehlt
 	"""
-	pass
+
+	def __init__(self, error):
+		""" Konstruktor. Nimmt das Ergebnistupel von sys.exc.info() als Argument. """
+		self.originalTB = "".join(traceback.format_exception(error[0], error[1], error[2]))
+
+	def __str__(self):
+		""" Gibt einen Infotext und die nicht erfolgte Ausgabe des auslösenden Fehlers zurück."""
+		return "Fehler bei der Berechnung des Phänotyps. Der Originalfehler lautet:\n\n" + self.originalTB
 
 
 class AutoPoemSpecimen:
@@ -72,7 +86,8 @@ class AutoPoemSpecimen:
 		self.__genes = genes or self.createRandomGenes()
 		self.__parent = parent
 		self.__children = []
-		self.__phenotype = phenotype # @TODO hier am besten gleich den Phänotyp erzeugen; hängt aber davon ab, wie lange die Fkt. braucht. Nur weil die Develop-Funktionen z.T. so lange brauchen, gibt es überhaupt die Möglichkeit, dem Konstruktor den Phänotpyen zu übergeben.
+		self.__phenotype = phenotype # @TODO hier am besten gleich den Phänotyp erzeugen; dazu muss die Fkt. aber schnell und zuverlässig arbeiten
+		# Nur weil die Develop-Funktionen z.T. so lange brauchen, gibt es überhaupt die Möglichkeit, dem Konstruktor den Phänotpyen zu übergeben und eine zweite Phänotyp-Erzeugung einzusparen.
 
 
 	def createRandomGenes(self):
@@ -96,12 +111,43 @@ class AutoPoemSpecimen:
 		return [self.__seedword, self.__genes]
 
 
-	def getPhenotype(self):
-		""" @TODO: Beschreibung fehlt
+	def getPhenotype(self, function=""):
+		""" @TODO: Beschreibung fehlt. Darin muss erwähnt werden, dass in dieser Funktion
+			ein HaikuError weitergeben werdem kann. Hier die alte Beschreibung von
+			__develop():
+
+			Dummy-Funktion. Ruft diejenige __develop...()-Funktion auf, deren Restname als
+			Parameter übergeben wird. __develop() als Dummy ermöglicht es, unterschiedliche
+			Phänotyp-Algorithmen zu verwenden, ohne den Code zu verändern (Ausnahme:
+			Default-Fkt.).
+
+			Tritt beim Funktionsaufruf ein Fehler auf, wird ein HaikuError von der
+			auslösenden Fehlerinstanz erzeugt und nach oben weitergegeben.
 		"""
-		if self.__phenotype == "":
-			self.__phenotype = self.__develop()
+
+		# Ist Phänotyp schon erzeugt worden?
+		if self.__phenotype != "":
+			return self.__phenotype
+
+		# Gut, dann erzeugen wir ihn eben jetzt
+		functions, funcPrefix = self.getDevelopFunctionNames(), "_" + self.__class__.__name__ + "__develop"
+		if function in functions:
+			funcName = function
+		else: # default
+			funcName = "LR575Syllables" # @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
+
+		# __develop...()-Funktion ausführen und eventuelle Fehler abfangen
+		try:
+			print "Calling develop function '" + funcName + "()'" #DEBUG
+			self.__phenotype = getattr(self, funcPrefix + funcName).__call__()
+		except:
+			raise HaikuError(sys.exc_info())
+
 		return self.__phenotype
+
+
+
+
 
 
 	def getParent(self):
@@ -180,7 +226,7 @@ class AutoPoemSpecimen:
 		return string.ascii_lowercase.find(c.lower()) + 1
 
 
-	def getFunctionNames(self):
+	def getDevelopFunctionNames(self):
 		"""@TODO: Beschreibung fehlt
 		"""
 		classPrefix = "_" + self.__class__.__name__ + "__develop"
@@ -195,6 +241,8 @@ class AutoPoemSpecimen:
 
 			Tritt beim Funktionsaufruf ein Fehler auf, wird ein HaikuError von der
 			auslösenden Fehlerinstanz erzeugt und nach oben weitergegeben.
+
+			@TODO: Der Inhalt dieser Fkt. kann getPhenotype() hinzugefügt werden
 		"""
 
 		functions, funcPrefix = self.getFunctionNames(), "_" + self.__class__.__name__ + "__develop"
@@ -204,14 +252,7 @@ class AutoPoemSpecimen:
 			# @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 			funcName = "LR575Syllables" # default
 #		print "Calling develop function '" + funcName + "()'" #DEBUG
-
-		# Funktion ausführen und Fehler abfangen
-#		try:
 		return getattr(self, funcPrefix + funcName).__call__()
-#		except:
-##			errorType, errorInstance, traceback = sys.exc_info()
-#			print sys.exc_info() #DEBUG
-#			raise #HaikuError from sys.exc_info()[1]
 
 
 	def __developLoremipsum(self):
@@ -261,7 +302,7 @@ class AutoPoemSpecimen:
 			else:
 				# das nicht benutzte Gen aus der vorigen Zeile hilft beim Erzeugen des Seedworts in dieser Zeile
 				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]])
-				words = Thesaurus(genotype[0], g) # das g-te Thesaurusergebnis wird Seedwort
+				words = Thesaurus(genotype[0], g, ) # das g-te Thesaurusergebnis wird Seedwort
 				seedword = words.pop()[0] # Thesaurus stellt das Synonymwort im Ergebnis an Pos. 0
 			line.pop(seedwordPos[i])
 			line.insert(seedwordPos[i], seedword)
@@ -320,7 +361,7 @@ class AutoPoemSpecimen:
 			Schöner wäre eine direkte Zuordnung Gen->Silbe, weil dann jede Mutation eine
 			konkrete Phänotypenveränderung hervorrufen würde.
 		"""
-
+		print "LR575Syl: Credentials sind", WORTSCHATZ_CREDENTIALS #DEBUG
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
 
 		# Position des Seedworts in der jeweiligen Zeile ermitteln. Zurzeit nehme ich die Position des Gens mit dem höchsten Wert
@@ -338,7 +379,7 @@ class AutoPoemSpecimen:
 			seedword = self.getGenotype()[0] # Zeile 0 und default
 			if i != 0:
 				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # nimmt das nicht benutzte Gen aus der vorigen Zeile, um das Seedwort dieser Zeile zu erzeugen
-				words = Thesaurus(self.getGenotype()[0], g) # hole g Worte via Thesaurus
+				words = Thesaurus(self.getGenotype()[0], g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
 				while len(words) > 0:
 					j = len(words) % g - 1
 #					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
@@ -364,7 +405,7 @@ class AutoPoemSpecimen:
 			while freeSyllablesLeft > 0:
 				word = "und"
 				g = self.__char2int(geneLines[i][freeSyllablesLeft-1])
-				words = LeftNeighbours(line.split()[0], g)
+				words = LeftNeighbours(line.split()[0], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
 					j = len(words) % g - 1
 #					print "Zeile", i, ", links: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
@@ -385,7 +426,7 @@ class AutoPoemSpecimen:
 			while freeSyllablesRight > 0:
 				word = "und"
 				g = self.__char2int(geneLines[i][syllableNo-freeSyllablesRight])
-				words = RightNeighbours(line.split()[-1], g)
+				words = RightNeighbours(line.split()[-1], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
 					j = len(words) % g - 1
 #					print "Zeile", i, ", rechts: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG

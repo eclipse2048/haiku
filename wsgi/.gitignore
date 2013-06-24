@@ -3,3 +3,4 @@
 *.geany
 application.py
 application.orig
+wortschatz.*

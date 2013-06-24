@@ -156,6 +156,7 @@ class automatoetry:
 		"""
 		global myPoem
 		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
+# @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten. Aber wie einen aufgetetenen Fehler behandeln?
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
 
 
@@ -179,6 +180,7 @@ class automatoetry:
 		# Kinder erzeugen und als JSON-Objekt zurückgeben
 		children = myPoem.procreateN(2)
 		print "/do POST: Kinder sind erzeugt" #DEBUG
+# @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten
 		return json.dumps([[child.getGenotype(), child.getPhenotype().replace("\n", "<br/>")] for child in children])
 
 
