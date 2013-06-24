@@ -12,11 +12,9 @@ $def with (form)
 		<script type="text/javascript">// Script ist kurz genug, dass es nicht in eigene Datei muss
 			jQuery(document).ready(function() {
 
-				// Fokus auf Los-Button setzen
-				jQuery("button.los").focus();
-
-				// Den "Neue/s..."-Buttons Event-Handler zuweisen
-				jQuery("input.button").click(function() {
+				// Den "Neue/s..."-Buttons Event-Handler zuweisen.
+				// Der "Los"-Button schickt das Formular von alleine ab
+				jQuery("table").on("click", "tr .button", function() {
 					var callButton = jQuery(this).attr("id");
 					jQuery.ajax({
 						type: "POST",
@@ -37,7 +35,15 @@ $def with (form)
 					return false;
 				});
 
-/*				// Event-Handler für die Warteanimation setzen
+				// Enter-Taste in einem der Textfelder sendet das Formular ab
+				jQuery(".textfield").keypress(function(e) {
+					if (e.which == 13) {
+						jQuery("button.los").trigger("click");
+						return false;
+					}
+				});
+
+/*				// Event-Handler für die Warteanimation setzen (funzt leider noch nicht)
 				jQuery("#loading").ajaxStart(function(){
 					console.log("/ AJAX started");
 					jQuery(this).show();
@@ -59,16 +65,9 @@ $def with (form)
 		</p>
 
 		<form method="post" action="/">
-			<table>
-				<tr>
-					<td>
-						<input class="button" type="submit" value="Neues Seedwort" id="newSeedword" />
-						<input class="button" type="submit" value="Neue Gene" id="newGenes" />
-					</td>
-				</tr>
-			</table>
 			$:form.render()
 		</form>
+
 <!--		<table>
 			<tr>
 				<td>
@@ -78,6 +77,7 @@ $def with (form)
 				</td>
 			</tr>
 		</table>-->
-		<p>Kontakt: <a href="http://www.tobias-radloff.de/blog/" target="_blank">Tobias Radloff</a></p>
+
+		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
 	</body>
 </html>

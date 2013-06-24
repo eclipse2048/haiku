@@ -63,16 +63,19 @@ class start:
 		wo der User den Genotyp für Generation 1 bestimmt. Das zugehörige Template ist "templates/start.html".
 	"""
 
-
 	# @TODO: Auswahlkästchen für die Developfkt. hinzufügen
 	form = web.form.Form(
-		# @TODO: Wenn ich mit dem Cursor im Seedwort-Feld Return drücke, soll der Los-Button ausgelöst werden und nicht wie im Moment "Neues Seedwort"
 		web.form.Textbox(
 			"seedword",
 			web.form.notnull,
 			size = 19,
 			class_ = "textfield",
 			description = "Seedwort:"
+		),
+		web.form.Button(
+			"Neues Seedwort",
+			id = "newSeedword",
+			class_ = "button"
 		),
 		web.form.Textbox(
 			"genes",
@@ -83,6 +86,11 @@ class start:
 			maxlength = 19,
 			class_ = "textfield",
 			description = "Gene:"
+		),
+		web.form.Button(
+			"Neue Gene",
+			id = "newGenes",
+			class_ = "button"
 		),
 		web.form.Button(
 			"Los",
@@ -128,8 +136,10 @@ class start:
 
 		# "Neu"-Button: neues Seedwort oder Gene zurückgeben
 		if input["caller"] == "newSeedword":
+			print "/ POST: Neues Seedword angefordert" #DEBUG
 			return myPoem.createRandomSeedword()
 		elif input["caller"] == "newGenes":
+			print "/ POST: Neue Gene angefordert" #DEBUG
 			return myPoem.createRandomGenes()
 
 
