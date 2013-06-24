@@ -1,0 +1,2 @@
+source ${OPENSHIFT_DATA_DIR}/.haiku_env
+

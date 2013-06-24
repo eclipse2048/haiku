@@ -101,7 +101,7 @@ class AutoPoemSpecimen:
 		"""	Gibt ein zufälliges Startwort zurück.
 		"""
 		# @TODO zufälliges Seedwort erzeugen statt hartcodiertes verwenden
-		return "Vogel"
+		return "werden"
 
 
 	def getGenotype(self):
