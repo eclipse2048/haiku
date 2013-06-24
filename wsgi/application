@@ -44,7 +44,7 @@ if RUNS_ON_OPENSHIFT:
 # Zusätzliche Module erst ab hier importieren (wg. Openshift virtual environment)
 import web # @TODO Von web.py auf flask umstellen
 import json
-from automatoetry import AutoPoemSpecimen#, HaikuError
+from automatoetry import AutoPoemSpecimen, HaikuError
 
 # Initialisierungsvariablen für web.py
 urls = ("/", "start", "/do", "automatoetry")
@@ -54,8 +54,8 @@ if RUNS_ON_OPENSHIFT:
 else:
 	app = web.application(urls, globals()) # Achtung: erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
-# globale Haiku-Instanz
-myPoem = AutoPoemSpecimen()
+# globale Haiku-Variable
+myPoem = None
 
 
 class start:
@@ -106,10 +106,15 @@ class start:
 	def GET(self):
 		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit Zufallswerten.
 		"""
-		# global myPoem ist hier unnötig, da die Instanz unverändert bleibt
+		# neues Start-Haiku erzeugen
+		global myPoem
+		myPoem = AutoPoemSpecimen()
+#		print "/ GET: lese myPoem aus:\n%s \n%s \n%s \n%s" %(myPoem.getGenotype(), myPoem.getPhenotype(), myPoem.getParent(), myPoem.getChildren()) #DEBUG
+
+		# Formular erzeugen und mit Werten füllen
 		f = self.form()
-		f["seedword"].set_value(myPoem.createRandomSeedword())
-		f["genes"].set_value(myPoem.createRandomGenes())
+		f["seedword"].set_value(myPoem.getGenotype()[0])
+		f["genes"].set_value(myPoem.getGenotype()[1])
 		return render.start(f)
 
 

@@ -64,7 +64,7 @@ class HaikuError(Exception):
 
 	def __str__(self):
 		""" Gibt einen Infotext und die nicht erfolgte Ausgabe des auslösenden Fehlers zurück."""
-		return "Fehler bei der Berechnung des Phänotyps. Der Originalfehler lautet:\n\n" + self.originalTB
+		return "Fehler bei der Berechnung des Phaenotyps. Der Originalfehler lautet:\n\n" + self.originalTB
 
 
 class AutoPoemSpecimen:
