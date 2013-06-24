@@ -26,15 +26,14 @@ from __future__ import division, absolute_import # Aufwärtskompatibilität
 import string
 import random
 import sys
+import os
 import traceback
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours
 
-# Credentials für die Wortschatz-API einlesen
-# Wenn kein Modul wortschatz.py mit eigenen Credentials existiert, wird der anonyme Zugang verwendet
-try:
-	from wortschatz import WORTSCHATZ_CREDENTIALS
-except ImportError:
-	WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
+# Umgebungsvariablen mit Credentials für die Wortschatz-API einlesen
+WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
+if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
+	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
 
 
 # Konstanten für die Silbenzählung
