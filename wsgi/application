@@ -20,7 +20,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-#
+
 
 from __future__ import division, absolute_import # Aufwärtskompatibilität
 import os
@@ -45,9 +45,6 @@ if RUNS_ON_OPENSHIFT:
 import web # @TODO Von web.py auf flask umstellen
 import json
 from automatoetry import AutoPoemSpecimen, HaikuError
-print "application: checking for Wortschatz env. vars"
-print "USER:", os.environ.has_key("WORTSCHATZ_USER")
-print "Password:", os.environ.has_key("WORTSCHATZ_PASSWORD")
 
 # Initialisierungsvariablen für web.py
 urls = ("/", "start", "/do", "automatoetry")
@@ -62,8 +59,10 @@ myPoem = None
 
 
 class start:
-	""" Definiert Formular und GET- und POST-Methoden für die Startwebseite des Projekts,
-		wo der User den Genotyp für Generation 1 bestimmt. Das zugehörige Template ist "templates/start.html".
+	""" Definiert Formular und GET- und POST-Methoden für die
+		Startwebseite des Projekts, auf der der User den Genotyp für
+		Generation 1 bestimmt. Das zugehörige Template ist
+		"templates/start.html".
 	"""
 
 	# @TODO: Auswahlkästchen für die Developfkt. hinzufügen
@@ -100,14 +99,11 @@ class start:
 			class_ = "los"
 		)
 	)
-	""" Eingabeformular für Seedwort und Gene. Buttons für neue Zufallswerte sind nicht
-		definiert, sie werden im Template hinzugefügt (@TODO: wobei sich das evtl.
-		streamlinen ließe).
-	"""
 
 
 	def GET(self):
-		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit Zufallswerten.
+		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit
+			Zufallswerten.
 		"""
 		# neues Start-Haiku erzeugen
 		global myPoem
@@ -122,11 +118,12 @@ class start:
 
 
 	def POST(self):
-		""" Wird von den Buttons auf "templates/start.html" aufgerufen. Je nach
-			Aufrufer wird unterschiedlich verfahren:
-			- Neues Seedwort / Neue Gene: Funktion gibt neue Zufallswerte zurück
-			- Los-Button: Funktion erzeugt myPoem mit den Werten aus dem Formular
-			neu und ruft Seite "do" auf.
+		""" Wird von den Buttons auf "templates/start.html" aufgerufen.
+			Je nach Aufrufer wird unterschiedlich verfahren:
+			- Neues Seedwort / Neue Gene: Funktion gibt neue
+			Zufallswerte zurück
+			- Los-Button: Funktion erzeugt myPoem mit den Werten aus dem
+			Formular neu und ruft Seite "do" auf.
 		"""
 
 		global myPoem
@@ -145,22 +142,23 @@ class start:
 		# "Neu"-Button: neues Seedwort oder Gene zurückgeben
 		if input["caller"] == "newSeedword":
 			print "/ POST: Neues Seedword angefordert" #DEBUG
-			return myPoem.createRandomSeedword()
+			return myPoem.getRandomSeedword()
 		elif input["caller"] == "newGenes":
 			print "/ POST: Neue Gene angefordert" #DEBUG
-			return myPoem.createRandomGenes()
+			return myPoem.getRandomGenes()
 
 
 class automatoetry:
-	""" Definiert GET- und POST-Methoden für die Hauptwebseite des Projekts,
-		wo der User zwischen den Kindern einer Generation entscheidet, welches
-		sich weiter fortpflanzt. Das zugehörige Template ist "templates/automatoetry.html".
+	""" Definiert GET- und POST-Methoden für die Hauptwebseite des
+		Projekts, auf der der User zwischen den Kindern einer Generation
+		entscheidet, welches sich weiter fortpflanzt. Das zugehörige
+		Template ist "templates/automatoetry.html".
 	"""
 
 
 	def GET(self):
-		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück (den Phänotypen als
-			Liste von Zeilen).
+		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück
+			(den Phänotypen als Liste von Zeilen).
 		"""
 		global myPoem
 		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
@@ -169,8 +167,8 @@ class automatoetry:
 
 
 	def POST(self):
-		""" Erledigt POST-Requests. Sorgt für den Wechsel zur neuen Generation und
-			gibt die zwei neue Kinder zurück.
+		""" Erledigt POST-Requests. Sorgt für den Wechsel zur neuen
+			Generation und gibt die zwei neue Kinder zurück.
 		"""
 
 		global myPoem
