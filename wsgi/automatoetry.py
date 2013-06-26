@@ -126,7 +126,9 @@ class AutoPoemSpecimen:
 		# Wort suchen und zurückgeben
 		wordStart = page.find('name="description" content="') + 28
 		wordEnd = page.find(" ", wordStart)
-		if page[wordEnd] == "-": print "Zufallswort enthaelt einen Bindestrich:", page[wordStart-100:wordEnd+100] #DEBUG
+		print "Zufallswort-Zeile lautet:", page[wordStart-20:wordEnd+20]
+		if page[wordEnd-1] == "-":
+			print "Zufallswort enthaelt Bindestrich:", page[wordStart-20:wordEnd+30] #DEBUG
 		word = page[wordStart:wordEnd].rstrip("-")
 		try:
 			word = word.decode("utf-8")
@@ -394,6 +396,7 @@ class AutoPoemSpecimen:
 				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # das nicht benutzte Gen aus der vorigen Zeile hilft, das Seedwort dieser Zeile zu erzeugen
 				if i == 1:
 					lineSeed = self.getGenotype()[0]
+					line1Seed = ""
 				elif i == 2:
 					lineSeed = line1Seed
 				baseSeed = Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)[0][0]

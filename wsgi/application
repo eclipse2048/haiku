@@ -75,7 +75,7 @@ class start:
 			description = "Seedwort:"
 		),
 		web.form.Button(
-			"Neues Seedwort",
+			"Neues Zufallswort",
 			id = "newSeedword",
 			class_ = "button"
 		),
