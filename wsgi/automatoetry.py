@@ -56,27 +56,6 @@ u"""Dictionary mit Woertern, die anders getrennt werden als nach den
 DEFAULT_SEEDWORD = u"werden"
 
 
-class HaikuError(Exception):
-	u"""@TODO: Beschreibung fehlt
-	"""
-
-	def __init__(self, error=None):
-		u"""Konstruktor. Nimmt das Ergebnistupel von sys.exc.info() als
-			Argument.
-		"""
-		if error:
-			self.originalTB = "".join(traceback.format_exception(error[0], error[1], error[2]))
-
-	def __str__(self):
-		u"""Gibt einen Infotext und ggf. die nicht erfolgte Ausgabe des
-			ausloesenden Fehlers zurueck.
-		"""
-		if "originalTB" in dir(self):
-			return "Fehler bei der Berechnung des Phaenotyps. Der Originalfehler lautet:\n\n" + self.originalTB
-		else:
-			return "Fehler bei der Berechnung des Phaenotyps."
-
-
 class AutoPoemSpecimen:
 	u"""@TODO: Einleitende Beschreibung fehlt.
 
@@ -116,7 +95,7 @@ class AutoPoemSpecimen:
 		conn = HTTPConnection("www.wordreference.com")
 #		conn.set_debuglevel(1) #DEBUG
 		conn.putrequest("GET", "/random/deen")
-#?		conn.putheader("accept-encoding", "utf-8")
+		conn.putheader("accept-encoding", "utf-8")
 		conn.putheader("user-agent", "python-httplib")
 		conn.endheaders()
 		resp = conn.getresponse()
@@ -132,8 +111,6 @@ class AutoPoemSpecimen:
 		wordStart = page.find('name="description" content="') + 28
 		wordEnd = page.find(" ", wordStart)
 		print "Zufallswort-Zeile lautet:", page[wordStart-10:wordEnd+30] #DEBUG
-		if page[wordEnd-1] == "-":
-			print "Zufallswort enthaelt Bindestrich:", page[wordStart-10:wordEnd+30] #DEBUG
 		word = page[wordStart:wordEnd].rstrip("-,").rstrip()
 		try:
 			word = word.decode("utf-8")
@@ -151,7 +128,9 @@ class AutoPoemSpecimen:
 
 	def getPhenotype(self, function=""):
 		u"""@TODO: Beschreibung fehlt. Darin muss erwaehnt werden, dass
-			in dieser Funktion ein HaikuError weitergeben werdem kann.
+			diese Funktion Fehler weitergeben kann, die abgefangen
+			werden müssen.
+
 			Hier die alte Beschreibung von __develop():
 
 			Dummy-Funktion. Ruft diejenige __develop...()-Funktion auf,
@@ -159,10 +138,6 @@ class AutoPoemSpecimen:
 			als Dummy ermoeglicht es, unterschiedliche Phaenotyp-
 			Algorithmen zu verwenden, ohne den Code zu veraendern
 			(Ausnahme: Default-Fkt.).
-
-			Tritt beim Funktionsaufruf ein Fehler auf, wird mit der
-			ausloesenden Fehlerinstanz ein HaikuError erzeugt und nach
-			oben weitergegeben.
 		"""
 
 		# Ist Phaenotyp schon erzeugt worden?
@@ -176,13 +151,8 @@ class AutoPoemSpecimen:
 		else: # default
 			funcName = "LR575Syllables" # @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 
-		# __develop...()-Funktion ausfuehren und eventuelle Fehler abfangen
-#		try:
 		print "Calling develop function '" + funcName + "()'" #DEBUG
 		self.__phenotype = getattr(self, funcPrefix + funcName).__call__()
-#		except:
-#			raise HaikuError(sys.exc_info())
-
 		return self.__phenotype
 
 
@@ -236,9 +206,6 @@ class AutoPoemSpecimen:
 	def countSyllables(self, word):
 		u"""Gibt die Zahl der Silben fuer ein deutsches Wort zurueck.
 		"""
-
-# @TODO: Silbenzahl wird z.T. falsch gezählt
-
 		# Wort ggf. in Unicode umwandeln
 		try:
 			word = word.decode("utf-8")
@@ -397,7 +364,7 @@ class AutoPoemSpecimen:
 		# nacheinander die drei Zeilen des Haikus erzeugen
 		for i in range(3):
 
-			# Seedwort finden
+			# Seedwort ermitteln
 			seedword = self.getGenotype()[0] # Zeile 0 und default
 			if i != 0:
 				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # das nicht benutzte Gen aus der vorigen Zeile hilft, das Seedwort dieser Zeile zu erzeugen
@@ -406,9 +373,17 @@ class AutoPoemSpecimen:
 					line1Seed = ""
 				elif i == 2:
 					lineSeed = line1Seed
-				baseSeed = Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)[0][0] # @TODO: Hier gab es neulich einen indexError: list index out of range
-				words = Similarity(baseSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
+
+				# Wortgrundform suchen
+				baseform = Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)
+				if len(baseform) > 0:
+					lineSeed = baseform[0][0]
+
+				# Thesaurus
+				words = Similarity(lineSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
 #				print len(words), [w[1] for w in words] #DEBUG
+
+				# Seedwort aus Rueckgabeliste auswaehlen
 				while len(words) > 0:
 					j = g % len(words) - 1
 #					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
@@ -423,7 +398,7 @@ class AutoPoemSpecimen:
 			line, s, syllableNo = seedword, self.countSyllables(seedword), 5
 			if i == 1:
 				syllableNo = 7
-			if s + seedwordPos[i] > syllableNo:
+			if s + seedwordPos[i] > syllableNo:#
 				freeSyllablesRight = 0
 				seedwordPos[i] = syllableNo - s
 			else:

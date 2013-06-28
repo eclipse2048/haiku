@@ -3,8 +3,8 @@
 jQuery(document).ready( function() {
 
 	console.log("/do Document ist ready."); //DEBUG
-
 	var genCount = 0;
+
 
 	// fuegt die Kinder der juengsten Generation zur Tabelle hinzu
 	function addTableRow(jsonData) {
@@ -20,6 +20,7 @@ jQuery(document).ready( function() {
 			// neue juengste Tabellenzeile erzeugen
 			.after("<tr class=\"empty\"><br /></tr><tr class=\"latest\" />");
 	};
+
 
 	// Initialen Ajax-Request abschicken
 	jQuery.ajax({
@@ -40,30 +41,21 @@ jQuery(document).ready( function() {
 		complete: function() {	jQuery("#loading").hide(); },
 	});
 
+
 	// Definiere Event-Handler fuer die Kind-Buttons
-	// Bemerke: .on() ordnet Handler auch bei nachtraeglicher Button-Erstellung zu
 	jQuery("table").on("click", "tr.button-row input.button", function() {
+		// evtl. Fehlermeldung loeschen
 		jQuery("div.errorMsg").html("");
-
-		var callButton = jQuery(this).attr("id");
-		console.log("/do input.button click()-Handler: callButton ist", callButton); //DEBUG
-
-		// nichtausgewaehltes Kind loeschen
-		switch (callButton) {
-			case "l":
-				// @TODO Haiku mit .hide("slow", function... ) ausblenden, ebenso bei case "r"
-				jQuery("tr.older:last td.child").eq(1).remove();
-				break;
-			case "r":
-				jQuery("tr.older:last td.child").eq(0).hide("slow").remove();
-				break;
-		};
-		// ueberlebende Tabellenzeile verbreitern und zentrieren
-		// @TODO ueberlebendes Haiku mit .animate() in die Mitte sliden
-		jQuery("tr.older:last td.child").attr("colspan", "2").attr("align", "center");
 
 		// Warteanimation einfuegen
 		jQuery("tr.latest").html("<td colspan=\"3\"><div align=\"center\" id=\"loading\"><img src=\"/static/ajax-loader.gif\" /></div></td>");
+
+		var callButton = jQuery(this).attr("id");
+		var lr = callButton == "l" ? 1 : 0;
+
+		// nichtausgewaehltes Kind verstecken
+		jQuery("tr.older:last td.child").eq(lr).hide();
+		jQuery("tr.older:last td.child").eq(1-lr).attr("colspan", "2"); // mit .animate() in die Mitte sliden?
 
 		// Sende AJAX-Request an Python-Backend
 		// Ich uebergebe die ID des Buttons ("l" oder "r") und erhalte dafuer ein JSON-Objekt mit den neuen Kindern
@@ -73,12 +65,20 @@ jQuery(document).ready( function() {
 			dataType: "json",
 			success: function(jsonData) {
 				console.log("input.button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+
+				// verstecktes Kind loeschen
+				jQuery("tr.older:last td.child").eq(lr).remove();
+
 				addTableRow(jsonData);
 				jQuery("html,body").animate({ scrollTop: jQuery("body").css("height") }); // nach unten scrollen
 			},
 			error: function(xhr, status, error) {
 				console.log("/do Initialer AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
 				jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>');
+
+				// verstecktes Kind wieder anzeigen
+				jQuery("tr.older:last td.child").eq(1-lr).removeAttr("colspan");
+				jQuery("tr.older:last td.child").eq(lr).show();
 			},
 			complete: function() {	jQuery("#loading").hide(); },
 		});

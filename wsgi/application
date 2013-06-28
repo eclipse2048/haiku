@@ -44,11 +44,12 @@ if RUNS_ON_OPENSHIFT:
 # Zusaetzliche Module erst ab hier importieren (wg. Openshift virtual environment)
 import web # @NICE2HAVE: Von web.py auf flask umstellen
 import json
-from automatoetry import AutoPoemSpecimen, HaikuError
+from automatoetry import AutoPoemSpecimen
 
 # Initialisierungsvariablen fuer web.py
 urls = ("/", "start", "/do", "automatoetry")
 render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
+#web.config.debug = False
 if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
@@ -164,8 +165,9 @@ class automatoetry:
 
 		global myPoem
 		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
-# @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten. Aber wie einen aufgetetenen Fehler behandeln?
-		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], myPoem.getPhenotype().split("\n"))
+		# @TODO: getPhenotype()-Aufruf in try: except HaikuError-Block einbetten. Problem: Wenn Fehler, wie gebe ich den an die Ajax-Fkt. weiter?
+		phenotype = myPoem.getPhenotype()
+		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], phenotype.split("\n"))
 
 
 	def POST(self):
@@ -184,7 +186,7 @@ class automatoetry:
 		elif input["child"] == "r":
 			myPoem = myPoem.getChildren()[1]
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
-
+s
 		# Kinder erzeugen und als JSON-Objekt zurueckgeben
 		children = myPoem.procreateN(2)
 		print "/do POST: Kinder sind erzeugt" #DEBUG
