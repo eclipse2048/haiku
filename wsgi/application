@@ -186,7 +186,7 @@ class automatoetry:
 		elif input["child"] == "r":
 			myPoem = myPoem.getChildren()[1]
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
-s
+
 		# Kinder erzeugen und als JSON-Objekt zurueckgeben
 		children = myPoem.procreateN(2)
 		print "/do POST: Kinder sind erzeugt" #DEBUG
