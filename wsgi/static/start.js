@@ -7,14 +7,13 @@ jQuery(document).ready(function() {
 	// Den "Neue/s..."-Buttons Event-Handler zuweisen.
 	// Der "Los"-Button schickt das Formular von alleine ab
 	jQuery("table").on("click", "tr .button", function() {
+		jQuery("div.errorMsg").html("");
+		jQuery("#loading").show();
+
 		var callButton = jQuery(this).attr("id");
 		jQuery.ajax({
 			type: "POST",
 			data: {caller: callButton},
-			beforeSend: function() {
-				jQuery("div.errorMsg").html("");
-				jQuery("#loading").show();
-			},
 			success: function(data) {
 				switch (callButton) {
 					case "newSeedword":

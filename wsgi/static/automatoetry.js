@@ -43,6 +43,8 @@ jQuery(document).ready( function() {
 	// Definiere Event-Handler fuer die Kind-Buttons
 	// Bemerke: .on() ordnet Handler auch bei nachtraeglicher Button-Erstellung zu
 	jQuery("table").on("click", "tr.button-row input.button", function() {
+		jQuery("div.errorMsg").html("");
+
 		var callButton = jQuery(this).attr("id");
 		console.log("/do input.button click()-Handler: callButton ist", callButton); //DEBUG
 

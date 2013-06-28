@@ -37,7 +37,7 @@ WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
 #	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
 
 # Konstanten fuer die Silbenzaehlung
-VOWELS_DE = u"aeiouyaeoeue"
+VOWELS_DE = u"aeiouyäoü"
 u"""Vokale der deutschen Sprache, einschliesslich "y" und Umlaute.
 """
 
@@ -46,7 +46,7 @@ u"""Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
 	als einsilbiger Laut behandelt werden.
 """
 
-SYLLABLE_COUNT_EXCEPTIONS = {u"Pietaet": 3, u"McDonald's": 3}
+SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3}
 u"""Dictionary mit Woertern, die anders getrennt werden als nach den
 	ueblichen Regeln. Bsp: Pi|e|taet statt Pie|taet. Das Wort ist der
 	key, die tatsaechliche Silbenzahl der value des Dictionary.
@@ -177,11 +177,11 @@ class AutoPoemSpecimen:
 			funcName = "LR575Syllables" # @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 
 		# __develop...()-Funktion ausfuehren und eventuelle Fehler abfangen
-		try:
-			print "Calling develop function '" + funcName + "()'" #DEBUG
-			self.__phenotype = getattr(self, funcPrefix + funcName).__call__()
-		except:
-			raise HaikuError(sys.exc_info())
+#		try:
+		print "Calling develop function '" + funcName + "()'" #DEBUG
+		self.__phenotype = getattr(self, funcPrefix + funcName).__call__()
+#		except:
+#			raise HaikuError(sys.exc_info())
 
 		return self.__phenotype
 
@@ -236,6 +236,8 @@ class AutoPoemSpecimen:
 	def countSyllables(self, word):
 		u"""Gibt die Zahl der Silben fuer ein deutsches Wort zurueck.
 		"""
+
+# @TODO: Silbenzahl wird z.T. falsch gezählt
 
 		# Wort ggf. in Unicode umwandeln
 		try:
