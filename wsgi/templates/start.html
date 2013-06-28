@@ -9,77 +9,30 @@ $def with (form)
 <!--	@TODO		Favicon? -->
 <!--	@TODO		Weblink zu jQuery? -->
 		<script type="text/javascript" src="/static/jquery-1.10.1.js"></script>
-		<script type="text/javascript">// Script ist kurz genug, dass es nicht in eigene Datei muss
-			jQuery(document).ready(function() {
-
-				// Den "Neue/s..."-Buttons Event-Handler zuweisen.
-				// Der "Los"-Button schickt das Formular von alleine ab
-				jQuery("table").on("click", "tr .button", function() {
-					var callButton = jQuery(this).attr("id");
-					jQuery.ajax({
-						type: "POST",
-						data: {caller: callButton},
-						success: function(data) {
-							switch (callButton) {
-								case "newSeedword":
-									jQuery("input#seedword").val(data);
-									break;
-								case "newGenes":
-									jQuery("input#genes").val(data);
-									break;
-								default:
-									console.log("Fehler in der AJAX Success-function :-(");
-							}
-						},
-					});
-					return false;
-				});
-
-				// Enter-Taste in einem der Textfelder sendet das Formular ab
-				jQuery(".textfield").keypress(function(e) {
-					if (e.which == 13) {
-						jQuery("button.los").trigger("click");
-						return false;
-					}
-				});
-
-/*				// Event-Handler für die Warteanimation setzen (funzt leider noch nicht)
-				jQuery("#loading").ajaxStart(function(){
-					console.log("/ AJAX started");
-					jQuery(this).show();
-				}).ajaxStop(function(){
-					console.log("/ AJAX stopped");
-					jQuery(this).hide();
-				}); */
-			});
-		</script>
+		<script type="text/javascript" src="/static/start.js"></script>
 	</head>
 
 	<body>
 		<h2>Automatoetry</h2>
 		<p><b>Haikus mit Mensch und Maschine</b></p>
 		<p>
-			Wenn die nächste Seite länger als ca. 30 Sekunden lädt, ist ein Fehler aufgetreten.
+			Wenn die naechste Seite laenger als ca. 30 Sekunden laedt, ist ein Fehler aufgetreten.
 			<br/>
 			Bitte starten Sie in diesem Fall <a href="/">neu</a>.
 		</p>
 
-		<form method="post" action="/">
+		<form method="post" action="/" id="geneForm">
 			$:form.render()
 		</form>
 
-<!--		<table>
-			<tr>
-				<td>
-					<div align="center" id="loading" style="visibility:hidden">
-						<img src="/static/ajax-loader.gif" />
-					</div>
-				</td>
-			</tr>
-		</table>-->
+		<div align="center" id="loading" style="display:none">
+			<img src="/static/ajax-loader.gif" />
+		</div>
+
+		<div class="errorMsg"></div>
 
 		<p>
-			Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a><br/>
+			Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universitaet Leipzig</a><br/>
 			Zufallswort: <a href="http://www.wordreference.com">WordReference.com</a>
 		</p>
 		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>

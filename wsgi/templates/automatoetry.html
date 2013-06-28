@@ -16,12 +16,13 @@ $def with (seedword, genes, phenotype)
 		<h2>Automatoetry</h2>
 		<p><b>Haikus mit Mensch und Maschine</b></p>
 		<p>
-			Wenn die Seite länger als ca. eine Minute lädt, ist ein Fehler aufgetreten.
+			Wenn die Seite laenger als ca. eine Minute laedt, ist ein Fehler aufgetreten.
 			<br/>
 			Bitte starten Sie in diesem Fall <a href="/">neu</a>.
 		</p>
-		<table>
+		<table class="haiku">
 			<tr class="parent">
+				<td class="genCount">0</td>
 				<td colspan="2" align="center" title="Seedwort: $seedword&#10;Gene: $genes">
 					$for line in phenotype:
 						$line <br />
@@ -29,12 +30,17 @@ $def with (seedword, genes, phenotype)
 			</tr>
 			<tr class="empty"><br/></tr>
 			<tr class="latest">
-				<td colspan="2" align="center">
-					<div align="center" id="loading"><img src="/static/ajax-loader.gif" /></div>
+				<td colspan="3" align="center">
+					<div align="center" id="loading">
+						<img src="/static/ajax-loader.gif" />
+					</div>
 				</td>
 			</tr>
 		</table>
-		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
+
+		<div class="errorMsg"></div>
+
+		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universitaet Leipzig</a></p>
 		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
 	</body>
 </html>

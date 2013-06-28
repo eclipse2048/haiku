@@ -22,7 +22,7 @@
 #
 #
 
-from __future__ import division, absolute_import # Aufwärtskompatibilität
+from __future__ import division, absolute_import # Aufwaertskompatibilitaet
 import string
 import random
 import sys
@@ -31,87 +31,92 @@ import traceback
 from libleipzig import Thesaurus, LeftNeighbours, RightNeighbours, Similarity, Baseform
 from httplib import HTTPConnection
 
-# Umgebungsvariablen mit Credentials für die Wortschatz-API einlesen
+# Umgebungsvariablen mit Credentials fuer die Wortschatz-API einlesen
 WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
-if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
-	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
+#if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
+#	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
 
-
-# Konstanten für die Silbenzählung
-VOWELS_DE = u"aeiouyäöü"
-""" Vokale der deutschen Sprache, einschließlich "y" und Umlaute.
+# Konstanten fuer die Silbenzaehlung
+VOWELS_DE = u"aeiouyaeoeue"
+u"""Vokale der deutschen Sprache, einschliesslich "y" und Umlaute.
 """
 
 ONE_SYLLABLE_COMBINATIONS = [u"aa", u"ae", u"ai", u"ao", u"au", u"ay", u"ee", u"ei", u"eu", u"ey", u"ie", u"ii", u"oe", u"oo", u"ou", u"oy", u"ue", u"ui", u"uo", u"uu", u"\xe4u"]
-""" Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
+u"""Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
 	als einsilbiger Laut behandelt werden.
 """
 
-SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3}
-""" Dictionary mit Wörtern, die anders getrennt werden als nach den
-	üblichen Regeln. Bsp: Pi|e|tät statt Pie|tät. Das Wort ist der key,
-	die tatsächliche Silbenzahl der value des Dictionary.
+SYLLABLE_COUNT_EXCEPTIONS = {u"Pietaet": 3, u"McDonald's": 3}
+u"""Dictionary mit Woertern, die anders getrennt werden als nach den
+	ueblichen Regeln. Bsp: Pi|e|taet statt Pie|taet. Das Wort ist der
+	key, die tatsaechliche Silbenzahl der value des Dictionary.
 """
 
 
-DEFAULT_SEEDWORD = u"Strauß"
+DEFAULT_SEEDWORD = u"werden"
 
 
 class HaikuError(Exception):
-	""" @TODO: Beschreibung fehlt
+	u"""@TODO: Beschreibung fehlt
 	"""
 
-	def __init__(self, error):
-		""" Konstruktor. Nimmt das Ergebnistupel von sys.exc.info() als
+	def __init__(self, error=None):
+		u"""Konstruktor. Nimmt das Ergebnistupel von sys.exc.info() als
 			Argument.
 		"""
-		self.originalTB = "".join(traceback.format_exception(error[0], error[1], error[2]))
+		if error:
+			self.originalTB = "".join(traceback.format_exception(error[0], error[1], error[2]))
 
 	def __str__(self):
-		""" Gibt einen Infotext und die nicht erfolgte Ausgabe des
-			auslösenden Fehlers zurück.
+		u"""Gibt einen Infotext und ggf. die nicht erfolgte Ausgabe des
+			ausloesenden Fehlers zurueck.
 		"""
-		return "Fehler bei der Berechnung des Phaenotyps. Der Originalfehler lautet:\n\n" + self.originalTB
+		if "originalTB" in dir(self):
+			return "Fehler bei der Berechnung des Phaenotyps. Der Originalfehler lautet:\n\n" + self.originalTB
+		else:
+			return "Fehler bei der Berechnung des Phaenotyps."
 
 
 class AutoPoemSpecimen:
-	"""	@TODO: Einleitende Beschreibung fehlt.
+	u"""@TODO: Einleitende Beschreibung fehlt.
 
 		Der Genotyp ist eine List mit zwei Elementen. Das erste Element
 		ist das Seedwort. Das zweite ist ein String mit drei Worten à 5,
 		7 und 5 Zeichen, jeweils durch Leerzeichen voneinander getrennt.
-		Die Zeichen stammen aus der Menge [a-z]. Die ersten fünf Zeichen
-		korrespondieren mit Zeile 1 des Phänotyps (des Haiku-Gedichts),
-		die letzten fünf mit Zeile 3 und die mittleren sieben mit Zeile 2.
+		Die Zeichen stammen aus der Menge [a-z]. Die ersten fuenf
+		Zeichen korrespondieren mit Zeile 1 des Phaenotyps (des Haiku-
+		Gedichts), die letzten fuenf mit Zeile 3 und die mittleren
+		sieben mit Zeile 2.
 	"""
 
 	def __init__(self, seedword=None, genes=None, parent=None, phenotype=""):
-		""" @TODO: Beschreibung einfügen
+		u"""@TODO: Beschreibung fehlt
 		"""
-		self.__seedword = seedword or self.getRandomSeedword() # @TODO: Seedwort auf String (und Duden?) überprüfen
-		# @TODO: Übergebene Gene auf len==17 und ascii_lowercase überprüfen: r"^[a-z]{5} [a-z]{7} [a-z]{5}$"
+		self.__seedword = seedword or self.getRandomSeedword()
+		# @TODO: Uebergebene Gene auf len==17 und ascii_lowercase ueberpruefen: r"^[a-z]{5} [a-z]{7} [a-z]{5}$"
 		self.__genes = genes or self.getRandomGenes()
 		self.__parent = parent
 		self.__children = []
-		self.__phenotype = phenotype # @TODO hier am besten gleich den Phänotyp erzeugen; dazu muss die Fkt. aber schnell und zuverlässig arbeiten. Nur weil die Develop-Funktionen z.T. so lange brauchen, gibt es überhaupt die Möglichkeit, dem Konstruktor den Phänotpyen zu übergeben und eine zweite Phänotyp-Erzeugung einzusparen.
+		self.__phenotype = phenotype # @TODO hier am besten gleich den Phaenotyp erzeugen; dazu muss die Fkt. aber schnell und zuverlaessig arbeiten. Nur weil die Develop-Funktionen z.T. so lange brauchen, gibt es ueberhaupt die Moeglichkeit, dem Konstruktor den Phaenotpyen zu uebergeben und eine zweite Phaenotyp-Erzeugung einzusparen.
 
 
 	def getRandomGenes(self):
-		"""	Erzeugt die Gene für ein zufälliges Exemplar. Nützlich für
-			die Erzeugung eines Startindividuums in Generation 1.
+		u"""Erzeugt die Gene fuer ein zufaelliges Exemplar. Nuetzlich
+			fuer die Erzeugung eines Startindividuums in Generation 1.
 		"""
 		genes = "".join([random.choice(string.ascii_lowercase) for i in range(17)])
 		return genes[:5] + " " + genes[5:12] + " " + genes[12:]
 
 
 	def getRandomSeedword(self):
-		"""	Gibt ein zufälliges Startwort zurück.
+		u"""Gibt ein zufaelliges Startwort zurueck.
 		"""
 
 		# Seite mit Zufallswort von Wordreference.com anfordern
 		conn = HTTPConnection("www.wordreference.com")
 #		conn.set_debuglevel(1) #DEBUG
 		conn.putrequest("GET", "/random/deen")
+#?		conn.putheader("accept-encoding", "utf-8")
 		conn.putheader("user-agent", "python-httplib")
 		conn.endheaders()
 		resp = conn.getresponse()
@@ -123,13 +128,13 @@ class AutoPoemSpecimen:
 			print "getRandomSeedword(): HTTP request fehlgeschlagen mit Status", resp.status, resp.reason
 			return DEFAULT_SEEDWORD
 
-		# Wort suchen und zurückgeben
+		# Wort suchen und zurueckgeben
 		wordStart = page.find('name="description" content="') + 28
 		wordEnd = page.find(" ", wordStart)
-		print "Zufallswort-Zeile lautet:", page[wordStart-20:wordEnd+20]
+		print "Zufallswort-Zeile lautet:", page[wordStart-10:wordEnd+30] #DEBUG
 		if page[wordEnd-1] == "-":
-			print "Zufallswort enthaelt Bindestrich:", page[wordStart-20:wordEnd+30] #DEBUG
-		word = page[wordStart:wordEnd].rstrip("-")
+			print "Zufallswort enthaelt Bindestrich:", page[wordStart-10:wordEnd+30] #DEBUG
+		word = page[wordStart:wordEnd].rstrip("-,").rstrip()
 		try:
 			word = word.decode("utf-8")
 		except UnicodeEncodeError, u:
@@ -139,28 +144,28 @@ class AutoPoemSpecimen:
 
 
 	def getGenotype(self):
-		""" @TODO: Beschreibung fehlt
+		u"""@TODO: Beschreibung fehlt
 		"""
 		return [self.__seedword, self.__genes]
 
 
 	def getPhenotype(self, function=""):
-		""" @TODO: Beschreibung fehlt. Darin muss erwähnt werden, dass
+		u"""@TODO: Beschreibung fehlt. Darin muss erwaehnt werden, dass
 			in dieser Funktion ein HaikuError weitergeben werdem kann.
 			Hier die alte Beschreibung von __develop():
 
 			Dummy-Funktion. Ruft diejenige __develop...()-Funktion auf,
-			deren Restname als Parameter übergeben wird. __develop() als
-			Dummy ermöglicht es, unterschiedliche Phänotyp-Algorithmen
-			zu verwenden, ohne den Code zu verändern (Ausnahme: Default-
-			Fkt.).
+			deren Restname als Parameter uebergeben wird. __develop()
+			als Dummy ermoeglicht es, unterschiedliche Phaenotyp-
+			Algorithmen zu verwenden, ohne den Code zu veraendern
+			(Ausnahme: Default-Fkt.).
 
 			Tritt beim Funktionsaufruf ein Fehler auf, wird mit der
-			auslösenden Fehlerinstanz ein HaikuError erzeugt und nach
+			ausloesenden Fehlerinstanz ein HaikuError erzeugt und nach
 			oben weitergegeben.
 		"""
 
-		# Ist Phänotyp schon erzeugt worden?
+		# Ist Phaenotyp schon erzeugt worden?
 		if self.__phenotype != "":
 			return self.__phenotype
 
@@ -171,7 +176,7 @@ class AutoPoemSpecimen:
 		else: # default
 			funcName = "LR575Syllables" # @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
 
-		# __develop...()-Funktion ausführen und eventuelle Fehler abfangen
+		# __develop...()-Funktion ausfuehren und eventuelle Fehler abfangen
 		try:
 			print "Calling develop function '" + funcName + "()'" #DEBUG
 			self.__phenotype = getattr(self, funcPrefix + funcName).__call__()
@@ -182,32 +187,32 @@ class AutoPoemSpecimen:
 
 
 	def getParent(self):
-		""" @TODO: Beschreibung fehlt
+		u"""@TODO: Beschreibung fehlt
 		"""
 		return self.__parent
 
 
 	def getChildren(self):
-		""" @TODO: Beschreibung fehlt
+		u"""@TODO: Beschreibung fehlt
 		"""
 		return self.__children
 
 
 	def __sylCount(self, charList):
-		"""	Rekursive Funktion, die die Zahl der Silben in einem Wort
+		u"""Rekursive Funktion, die die Zahl der Silben in einem Wort
 			der deutschen Sprache ermittelt. Der Algorithmus sucht die
-			nächste zusammenhängenden Vokalkette und überprüft, ob diese
-			eine oder mehrere Silben konstituiert.
+			naechste zusammenhaengenden Vokalkette und ueberprueft, ob
+			diese eine oder mehrere Silben konstituiert.
 
 			Das Eingabewort wird nicht als String erwartet, sondern als
 			Liste von einzelnen Buchstaben, alle klein und mit
-			umgewandelten Umlauten (z.B. 'ä' zu 'ae').
+			umgewandelten Umlauten (z.B. 'ae' zu 'ae').
 		"""
 		if charList == []:
 			return 0
 		c, v = 0, []
 
-		# nächste Kette von Vokalen finden
+		# naechste Kette von Vokalen finden
 		while c < len(charList) and charList[c] not in VOWELS_DE:
 			c += 1
 		while c < len(charList) and charList[c] in VOWELS_DE:
@@ -229,7 +234,7 @@ class AutoPoemSpecimen:
 
 
 	def countSyllables(self, word):
-		"""	Gibt die Zahl der Silben für ein deutsches Wort zurück.
+		u"""Gibt die Zahl der Silben fuer ein deutsches Wort zurueck.
 		"""
 
 		# Wort ggf. in Unicode umwandeln
@@ -242,17 +247,17 @@ class AutoPoemSpecimen:
 		if word in SYLLABLE_COUNT_EXCEPTIONS.keys():
 			return SYLLABLE_COUNT_EXCEPTIONS[word]
 
-		# Manchmal gibt libleipzig merere Worte als ein einzelnes zurück
+		# Manchmal gibt libleipzig merere Worte als ein einzelnes zurueck
 		if " " in word:
 			return sum([self.__sylCount(list(w.strip().lower())) for w in word.split()])
 
-		# Wort in Liste von Kleinbuchstaben umwandeln und ab dafür
+		# Wort in Liste von Kleinbuchstaben umwandeln und ab dafuer
 		return self.__sylCount(list(word.strip().lower()))
 
 
 	def __char2int(self, c):
-		"""	Gibt die Position des übergebenen Buchstabens im Alphabet
-			zurück, bzw. 0 falls c kein Buchstabe ist.
+		u"""Gibt die Position des uebergebenen Buchstabens im Alphabet
+			zurueck, bzw. 0 falls c kein Buchstabe ist.
 		"""
 		return string.ascii_lowercase.find(c.lower()) + 1
 
@@ -266,26 +271,26 @@ class AutoPoemSpecimen:
 
 
 	def __developLoremipsum(self):
-		""" Gibt ein hartcodiertes Haiku zurück. Gut fürs Debugging und
-			wenn der Wortschatz-Server nicht erreichbar ist.
+		u"""Gibt ein hartcodiertes Haiku zurueck. Gut fuers Debugging
+			und wenn der Wortschatz-Server nicht erreichbar ist.
 		"""
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
 	# Funktion ist kaputt
 	def __developLR575Words(self, genotype=[]):
-		"""	Erzeugt aus einem Genotyp den dazugehörigen Phänotyp. Hier
+		u"""Erzeugt aus einem Genotyp den dazugehoerigen Phaenotyp. Hier
 			findet der schwierige Teil des gesamten Programms statt.
 
-			Die Funktion entwickelt den übergebenen Genotypen. Wird kein
-			Genotyp übergeben, nimmt sie den Genotyp der eigenen
+			Die Funktion entwickelt den uebergebenen Genotypen. Wird
+			kein Genotyp uebergeben, nimmt sie den Genotyp der eigenen
 			Instanz.
 
 			__developLR575Words() erzeugt ein Haiku, das anstatt aus
-			5-7-5 Silben aus 5-7-5 Wörtern besteht. In jeder Zeile wird
+			5-7-5 Silben aus 5-7-5 Woertern besteht. In jeder Zeile wird
 			das Seedwort ermittelt und an die richtige Stelle gesetzt,
 			danach wird die Zeile nach links und rechts mit
-			Left/RightNeighbours aufgefüllt.
+			Left/RightNeighbours aufgefuellt.
 		"""
 
 		if genotype == []:
@@ -294,7 +299,7 @@ class AutoPoemSpecimen:
 		geneLines, phenotype, seedwordPos = genotype[1].split(), [], []
 
 		# Position des Seedworts in der jeweiligen Zeile ermitteln.
-		# Zurzeit nehme ich die Position des Gens mit dem höchsten Wert
+		# Zurzeit nehme ich die Position des Gens mit dem hoechsten Wert
 		for i in range(3):
 			seedwordPos.append(geneLines[i].index(max(geneLines[i])))
 
@@ -319,12 +324,12 @@ class AutoPoemSpecimen:
 			line.pop(seedwordPos[i])
 			line.insert(seedwordPos[i], seedword)
 
-			# Zeile nach links vervollständigen
+			# Zeile nach links vervollstaendigen
 			if seedwordPos[i] != 0:
 				for j in range(seedwordPos[i]-1, -1, -1):
 					words = LeftNeighbours(line[j+1], self.__char2int(geneLines[i][j]))
 
-					if len(words) == 0: # prüfen, ob die Neighbours-Liste leer ist
+					if len(words) == 0: # pruefen, ob die Neighbours-Liste leer ist
 						word = "Ersatz"
 					else:
 						word = words.pop()[0] # LeftNeighbours stellt das Nachbarwort im Ergebnis an Pos. 0
@@ -332,12 +337,12 @@ class AutoPoemSpecimen:
 					line.pop(j)
 					line.insert(j, word)
 
-			# Zeile nach rechts vervollständigen
+			# Zeile nach rechts vervollstaendigen
 			if seedwordPos[i] != len(geneLines[i])-1:
 				for j in range(seedwordPos[i]+1, len(geneLines[i])):
 					words = RightNeighbours(line[j-1], self.__char2int(geneLines[i][j]))
 
-					if len(words) == 0: # prüfen, ob die Neighbours-Liste leer ist
+					if len(words) == 0: # pruefen, ob die Neighbours-Liste leer ist
 						word = "Ersatz"
 					else:
 						word = words.pop()[1] # RightNeighbours stellt das Nachbarwort im Ergebnis an Pos. 1
@@ -349,34 +354,34 @@ class AutoPoemSpecimen:
 
 		p = "\n".join(phenotype)
 
-		# Falls der Genotyp der Instanz entwickelt wurde: Phänotyp speichern
+		# Falls der Genotyp der Instanz entwickelt wurde: Phaenotyp speichern
 		if genotype == self.getGenotype():
 			self.__phenotype = p
 		return p
 
 
 	def __developLR575Syllables(self):
-		"""	__developLR575Syllables() erzeugt ein Haiku aus 5-7-5
+		u"""__developLR575Syllables() erzeugt ein Haiku aus 5-7-5
 			Silben. Wie bei __developLR575Words() wird in jeder Zeile
 			das Seedwort ermittelt und an die entsprechende Stelle
 			gesetzt. Danach wird die Zeile nach links und rechts mit
-			Left/RightNeighbours aufgefüllt, bis die gewünschte
+			Left/RightNeighbours aufgefuellt, bis die gewuenschte
 			Silbenanzahl erreicht ist. Falls nur noch eine Silbe frei
-			ist und die Neighbours-Liste kein einsilbiges Wort enthält,
+			ist und die Neighbours-Liste kein einsilbiges Wort enthaelt,
 			nehme ich "und".
 
-			Die Ergebnisse sind nicht völlig schlecht, aber:
+			Die Ergebnisse sind nicht voellig schlecht, aber:
 			- Kinder haben zu wenig Varianz, vor allem bei
-			ungewöhnlichen Seedworten mit wenigen Synonymen.
-			- Oft ist der Phänotyp einer oder beider Kinder identisch
+			ungewoehnlichen Seedworten mit wenigen Synonymen.
+			- Oft ist der Phaenotyp einer oder beider Kinder identisch
 			mit dem des Elter.
-			- Nicht jede Mutation sorgt für eine sichtbare Veränderung,
-			und wenn es zu Veränderungen kommt, betreffen sie oft die
-			ganze Zeile.
+			- Nicht jede Mutation sorgt fuer eine sichtbare
+			Veraenderung, und wenn es zu Veraenderungen kommt, betreffen
+			sie oft die ganze Zeile.
 
-			Schöner wäre eine direkte Zuordnung Gen->Silbe, weil dann
-			jede Mutation eine konkrete Phänotypenveränderung
-			hervorrufen würde.
+			Schoener waere eine direkte Zuordnung Gen->Silbe, weil dann
+			jede Mutation eine konkrete Phaenotypenveraenderung
+			hervorrufen wuerde.
 		"""
 		print "LR575Syl: Credentials sind", WORTSCHATZ_CREDENTIALS #DEBUG
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
@@ -399,7 +404,7 @@ class AutoPoemSpecimen:
 					line1Seed = ""
 				elif i == 2:
 					lineSeed = line1Seed
-				baseSeed = Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)[0][0]
+				baseSeed = Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)[0][0] # @TODO: Hier gab es neulich einen indexError: list index out of range
 				words = Similarity(baseSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
 #				print len(words), [w[1] for w in words] #DEBUG
 				while len(words) > 0:
@@ -412,7 +417,7 @@ class AutoPoemSpecimen:
 #			print "Das Seedwort lautet", seedword #DEBUG
 
 			# Zahl der freien Silben rechts und links errechnen
-			# @TODO: Was tun, wenn Seedwort zu lang für die Zeile?
+			# @TODO: Was tun, wenn Seedwort zu lang fuer die Zeile?
 			line, s, syllableNo = seedword, self.countSyllables(seedword), 5
 			if i == 1:
 				syllableNo = 7
@@ -424,9 +429,9 @@ class AutoPoemSpecimen:
 			freeSyllablesLeft = seedwordPos[i]
 #			print syllableNo, seedwordPos[i], freeSyllablesRight, freeSyllablesLeft #DEBUG
 
-			# Zeile nach links vervollständigen
+			# Zeile nach links vervollstaendigen
 			while freeSyllablesLeft > 0:
-				word = "und" # @TODO: zufälliges Ein-Silben-Füllwort aussuchen
+				word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
 				g = self.__char2int(geneLines[i][freeSyllablesLeft-1])
 				words = LeftNeighbours(line.split()[0], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
@@ -445,9 +450,9 @@ class AutoPoemSpecimen:
 				line = word + " " + line
 #				print line, freeSyllablesLeft #DEBUG
 
-			# Zeile nach rechts vervollständigen
+			# Zeile nach rechts vervollstaendigen
 			while freeSyllablesRight > 0:
-				word = "und" # @TODO: zufälliges Ein-Silben-Füllwort aussuchen
+				word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
 				g = self.__char2int(geneLines[i][syllableNo-freeSyllablesRight])
 				words = RightNeighbours(line.split()[-1], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
@@ -479,43 +484,44 @@ class AutoPoemSpecimen:
 
 
 	def procreate1(self):
-		"""	Gibt eine Instanz von AutoPoemSpecimen zurück, deren Genotyp
-			eine Mutation des eigenen Genotyps ist.
+		u"""Gibt eine Instanz von AutoPoemSpecimen zurueck, deren
+			Genotyp eine Mutation des eigenen Genotyps ist.
 
-			Zurzeit wird ein Gen zufällig ausgewählt und entweder um
-			eins erhöht oder um eins erniedrigt.
+			Zurzeit wird ein Gen zufaellig ausgewaehlt und um eins oder
+			zwei entweder erhoeht oder erniedrigt.
 		"""
 
 		parent = self.getGenotype()
-		newSeedword = parent[0] # @TODO: Mutation des Seedworts ermöglichen
+		newSeedword = parent[0] # @TODO: Mutation des Seedworts ermoeglichen
 
-		# Zufälliges Gen mutieren
+		# Zufaelliges Gen mutieren
 		genes = parent[1].replace(" ", "")
-		i, j = random.randint(0, 16), random.choice([-1, +1])
+		i, j = random.randint(0, 16), random.choice([-2, -1, 1, 2])
 		mutatedGene = chr(ord(genes[i]) + j)
 
-		# Sonderfälle abfangen
+		# Sonderfaelle abfangen
 		if mutatedGene == chr(96):
 			mutatedGene = "z"
 		elif mutatedGene == chr(123):
 			mutatedGene = "a"
 
 		mutatedGenes = genes[:i] + mutatedGene + genes[i+1:]
-		# @TODO Sollte ich den Phänotyp mit dem des Elter abgleichen, um identische Phänotypen zu vermeiden? Andererseits würde ich damit Mutationssprünge von mehr als einem Gen und +/-1 unmöglich machen
+		# @TODO Sollte ich den Phaenotyp mit dem des Elter abgleichen, um identische Phaenotypen zu vermeiden? Andererseits wuerde ich damit Mutationsspruenge von mehr als einem Gen und +/-1 unmoeglich machen
 		return AutoPoemSpecimen(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self)
 
 
 	def procreateN(self, litterSize=2):
-		"""	Erzeugt n voneinander verschiedene Kinder, die alle vom
+		u"""Erzeugt n voneinander verschiedene Kinder, die alle vom
 			Genotyp der Instanz abstammen.
 
 			Anders als Procreate1() gibt diese Funktion die neuen Kinder
-			nicht als Einträge zurück, sondern erzeugt einen komplett
-			neuen Wurf und speichert ihn in der Instanz.
+			nicht nur zurueck (als Liste von AutoPoemSpecimen), sondern
+			speichert den Wurf zusaetzlich in der Instanz (wobei alle
+			existierenden Kinder ueberschrieben werden).
 		"""
 
 		# Erstes Kind
-		self.__children = [self.procreate1(), ] # vorhandene Kinder werden überschrieben
+		self.__children = [self.procreate1(), ] # vorhandene Kinder werden ueberschrieben
 		if litterSize == 1:
 			return self.__children
 
@@ -527,8 +533,8 @@ class AutoPoemSpecimen:
 				newChild = self.procreate1()
 				isDistinct = True
 
-				# prüfen, ob das neue Kind mit einem der schon erzeugten Kinder identisch ist
-				# @TODO Phänotypen miteinander vergleichen statt wie im Moment nur die Genotypen
+				# pruefen, ob das neue Kind mit einem der schon erzeugten Kinder identisch ist
+				# @TODO Phaenotypen miteinander vergleichen statt wie im Moment nur die Genotypen
 				for j in range(len(self.__children)):
 					if newChild.getGenotype()[1] == self.__children[j].getGenotype()[1]:
 						# @TODO: Was tun, wenn die Varianz der Develop-Fkt. keine Varianz erzeugt, d.h. alle Kinder sind gleich und die while-Schleife nie endet?
@@ -547,14 +553,14 @@ class AutoPoemSpecimen:
 	# Funktion ist obsolet (Web-Frontend) und kaputt; sie beruht noch darauf, dass die
 	# Kinder keine Klasseninstanzen, sondern reine Genotypen sind
 def chooseNewGeneration(autoPoem, children):
-	"""	Lässt den Benutzer eines der Kinder in der übergebenen Liste
-		auswählen.
+	u"""Laesst den Benutzer eines der Kinder in der uebergebenen Liste
+		auswaehlen.
 
-		Zurzeit erfolgt die Auswahl über die Kommandozeile und die
+		Zurzeit erfolgt die Auswahl ueber die Kommandozeile und die
 		Eingabe via raw_input().
 	"""
 
-	# Phänotypen erzeugen und anzeigen
+	# Phaenotypen erzeugen und anzeigen
 	for i in range(len(children)):
 		children[i].append(autoPoem.develop(children[i]))
 		print "Kind " + str(i+1) + ":\n\n"
@@ -562,14 +568,14 @@ def chooseNewGeneration(autoPoem, children):
 
 	# Nutzereingabe einholen und auswerten
 	while True:
-		choice = raw_input("Welches Kind (1 bis " + str(len(children)) + ") soll überleben?\n")
+		choice = raw_input(u"Welches Kind (1 bis " + str(len(children)) + u") soll ueberleben?\n")
 		try:
 			c = int(choice)
 		except:
 			print "Bitte Eingabe wiederholen."
 			continue
 		if not 0 < c < len(children)+1:
-			print "Bitte wählen Sie ein Kind aus der Liste aus."
+			print u"Bitte waehlen Sie ein Kind aus der Liste aus."
 			continue
 		break
 
@@ -579,7 +585,7 @@ def chooseNewGeneration(autoPoem, children):
 def main():
 	myPoem = AutoPoemSpecimen()
 	print "Genotyp: ", myPoem.getGenotype()
-	print "\nPhänotyp:\n\n", myPoem.getPhenotype()
+	print u"\nPhaenotyp:\n\n", myPoem.getPhenotype()
 
 #	while True: # dieser Block fkt. so nicht mehr
 #		children = myPoem.procreateN([], 2)

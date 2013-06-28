@@ -22,7 +22,7 @@
 #
 
 
-from __future__ import division, absolute_import # Aufwärtskompatibilität
+from __future__ import division, absolute_import # Aufwaertskompatibilitaet
 import os
 
 # lokal oder Openshift?
@@ -31,7 +31,7 @@ if os.environ.has_key("OPENSHIFT_PYTHON_DIR"):
 else:
 	RUNS_ON_OPENSHIFT = False
 
-# Virtual Environment für Openshift
+# Virtual Environment fuer Openshift
 if RUNS_ON_OPENSHIFT:
 	virtenv = os.environ["OPENSHIFT_PYTHON_DIR"] + "/virtenv/"
 	os.environ["PYTHON_EGG_CACHE"] = os.path.join(virtenv, "lib/python2.6/site-packages")
@@ -41,31 +41,31 @@ if RUNS_ON_OPENSHIFT:
 	except IOError:
 		pass
 
-# Zusätzliche Module erst ab hier importieren (wg. Openshift virtual environment)
-import web # @TODO Von web.py auf flask umstellen
+# Zusaetzliche Module erst ab hier importieren (wg. Openshift virtual environment)
+import web # @NICE2HAVE: Von web.py auf flask umstellen
 import json
 from automatoetry import AutoPoemSpecimen, HaikuError
 
-# Initialisierungsvariablen für web.py
+# Initialisierungsvariablen fuer web.py
 urls = ("/", "start", "/do", "automatoetry")
 render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
 if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
-	app = web.application(urls, globals()) # Achtung: erzeugt ImportError, falls kein Symlink application.py -> application existiert
+	app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
 # globale Haiku-Variable
 myPoem = None
 
 
 class start:
-	""" Definiert Formular und GET- und POST-Methoden für die
-		Startwebseite des Projekts, auf der der User den Genotyp für
-		Generation 1 bestimmt. Das zugehörige Template ist
+	u"""Definiert Formular und GET- und POST-Methoden fuer die
+		Startwebseite des Projekts, auf der der User den Genotyp fuer
+		Generation 1 bestimmt. Das zugehoerige Template ist
 		"templates/start.html".
 	"""
 
-	# @TODO: Auswahlkästchen für die Developfkt. hinzufügen
+	# @TODO: Auswahlkaestchen fuer die Developfkt. hinzufuegen
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
@@ -83,7 +83,7 @@ class start:
 			"genes",
 			web.form.notnull,
 			web.form.regexp(r"^[a-z ]*$", "Bitte nur Kleinbuchstaben"),
-			web.form.regexp(r"^[a-z]{5} [a-z]{7} [a-z]{5}$", "Gene müssen 5, 7, 5 Zeichen enthalten, jeweils durch Leerzeichen getrennt"), #
+			web.form.regexp(r"^[a-z]{5} [a-z]{7} [a-z]{5}$", "Gene muessen 5, 7, 5 Zeichen enthalten, jeweils durch Leerzeichen getrennt"), #
 			size = 19,
 			maxlength = 19,
 			class_ = "textfield",
@@ -102,15 +102,15 @@ class start:
 
 
 	def GET(self):
-		""" Gibt das Formular für Gene und Seedwort zurück, befüllt mit
-			Zufallswerten.
+		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
+			mit Zufallswerten.
 		"""
 		# neues Start-Haiku erzeugen
 		global myPoem
 		myPoem = AutoPoemSpecimen()
 #		print "/ GET: lese myPoem aus:\n%s \n%s \n%s \n%s" %(myPoem.getGenotype(), myPoem.getPhenotype(), myPoem.getParent(), myPoem.getChildren()) #DEBUG
 
-		# Formular erzeugen und mit Werten füllen
+		# Formular erzeugen und mit Werten fuellen
 		f = self.form()
 		f["seedword"].set_value(myPoem.getGenotype()[0])
 		f["genes"].set_value(myPoem.getGenotype()[1])
@@ -118,12 +118,12 @@ class start:
 
 
 	def POST(self):
-		""" Wird von den Buttons auf "templates/start.html" aufgerufen.
+		u"""Wird von den Buttons auf "templates/start.html" aufgerufen.
 			Je nach Aufrufer wird unterschiedlich verfahren:
 			- Neues Seedwort / Neue Gene: Funktion gibt neue
-			Zufallswerte zurück
-			- Los-Button: Funktion erzeugt myPoem mit den Werten aus dem
-			Formular neu und ruft Seite "do" auf.
+			Zufallswerte zurueck
+			- Los-Button (Submit): Funktion erzeugt myPoem mit den
+			Werten aus dem Formular neu und ruft Seite "do" auf.
 		"""
 
 		global myPoem
@@ -139,7 +139,7 @@ class start:
 			print "/ POST: Elter lautet", myPoem.getGenotype() #DEBUG
 			raise web.seeother("do")
 
-		# "Neu"-Button: neues Seedwort oder Gene zurückgeben
+		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
 		if input["caller"] == "newSeedword":
 			print "/ POST: Neues Seedword angefordert" #DEBUG
 			return myPoem.getRandomSeedword()
@@ -149,17 +149,19 @@ class start:
 
 
 class automatoetry:
-	""" Definiert GET- und POST-Methoden für die Hauptwebseite des
+	u"""Definiert GET- und POST-Methoden fuer die Hauptwebseite des
 		Projekts, auf der der User zwischen den Kindern einer Generation
-		entscheidet, welches sich weiter fortpflanzt. Das zugehörige
+		entscheidet, welches sich weiter fortpflanzt. Das zugehoerige
 		Template ist "templates/automatoetry.html".
 	"""
 
 
 	def GET(self):
-		""" Gibt Seedwort, Gene und Phänotype für Generation 1 zurück
-			(den Phänotypen als Liste von Zeilen).
+		u"""Gibt Seedwort, Gene und Phaenotyp fuer Generation 1 zurueck
+			(den Phaenotyp als Liste von Zeilen).
 		"""
+		# @NICE2HAVE: Redirect nach /, falls die Seite anders als durch seeother()  aufgerufen wurde
+
 		global myPoem
 		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
 # @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten. Aber wie einen aufgetetenen Fehler behandeln?
@@ -167,8 +169,8 @@ class automatoetry:
 
 
 	def POST(self):
-		""" Erledigt POST-Requests. Sorgt für den Wechsel zur neuen
-			Generation und gibt die zwei neue Kinder zurück.
+		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
+			Generation und gibt die zwei neue Kinder zurueck.
 		"""
 
 		global myPoem
@@ -183,7 +185,7 @@ class automatoetry:
 			myPoem = myPoem.getChildren()[1]
 		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
 
-		# Kinder erzeugen und als JSON-Objekt zurückgeben
+		# Kinder erzeugen und als JSON-Objekt zurueckgeben
 		children = myPoem.procreateN(2)
 		print "/do POST: Kinder sind erzeugt" #DEBUG
 # @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten
