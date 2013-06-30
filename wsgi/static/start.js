@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
 	// Enter-Taste in einem der Textfelder sendet das Formular ab
 	jQuery(".textfield").keypress(function(e) {
 		if (e.which == 13) {
-			jQuery("form#geneForm").trigger("submit");
+			jQuery("button.Los").trigger("click");
 			return false;
 		}
 	});

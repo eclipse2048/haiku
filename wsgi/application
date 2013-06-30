@@ -22,7 +22,7 @@
 #
 
 
-from __future__ import division, absolute_import # Aufwaertskompatibilitaet
+from __future__ import division, absolute_import
 import os
 
 # lokal oder Openshift?
@@ -56,7 +56,7 @@ else:
 	app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
 # globale Haiku-Variable
-myPoem = None
+myPoem = AutoPoemSpecimen() # Instanziierung vermeidet evtl. Reload-Fehler nach einem Programmneustart
 
 
 class start:
@@ -65,7 +65,6 @@ class start:
 		Generation 1 bestimmt. Das zugehoerige Template ist
 		"templates/start.html".
 	"""
-
 	# @TODO: Auswahlkaestchen fuer die Developfkt. hinzufuegen
 	form = web.form.Form(
 		web.form.Textbox(
@@ -106,10 +105,8 @@ class start:
 		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
 			mit Zufallswerten.
 		"""
-		# neues Start-Haiku erzeugen
 		global myPoem
 		myPoem = AutoPoemSpecimen()
-#		print "/ GET: lese myPoem aus:\n%s \n%s \n%s \n%s" %(myPoem.getGenotype(), myPoem.getPhenotype(), myPoem.getParent(), myPoem.getChildren()) #DEBUG
 
 		# Formular erzeugen und mit Werten fuellen
 		f = self.form()
