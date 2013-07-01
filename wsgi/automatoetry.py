@@ -77,9 +77,10 @@ u"""Liste der Wortarten fuer den Left/RightCollocationFinder(). A =
 corpusFile = "nltk-corpus-stopwords-german.txt"
 if os.environ.has_key("OPENSHIFT_REPO_DIR"):
 	filename = os.environ["OPENSHIFT_REPO_DIR"] + "wsgi/static/" + corpusFile
+	print "Stoppworte einlesen: Openshift-Umgegung erkannt. Dateiname ist", filename #DEBUG
 else:
 	filename = "static/" + corpusFile
-	print "Stoppworte einlesen: lokale Umgegung erkannt. Dateiname ist", filename
+	print "Stoppworte einlesen: lokale Umgegung erkannt. Dateiname ist", filename #DEBUG
 f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
@@ -291,89 +292,6 @@ class AutoPoemSpecimen:
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
-	# Funktion ist kaputt
-	def __developLR575Words(self, genotype=[]):
-		u"""Erzeugt aus einem Genotyp den dazugehoerigen Phaenotyp. Hier
-			findet der schwierige Teil des gesamten Programms statt.
-
-			Die Funktion entwickelt den uebergebenen Genotypen. Wird
-			kein Genotyp uebergeben, nimmt sie den Genotyp der eigenen
-			Instanz.
-
-			__developLR575Words() erzeugt ein Haiku, das anstatt aus
-			5-7-5 Silben aus 5-7-5 Woertern besteht. In jeder Zeile wird
-			das Seedwort ermittelt und an die richtige Stelle gesetzt,
-			danach wird die Zeile nach links und rechts mit
-			Left/RightNeighbours aufgefuellt.
-		"""
-
-		if genotype == []:
-			genotype = self.getGenotype()
-
-		geneLines, phenotype, seedwordPos = genotype[1].split(), [], []
-
-		# Position des Seedworts in der jeweiligen Zeile ermitteln.
-		# Zurzeit nehme ich die Position des Gens mit dem hoechsten Wert
-		for i in range(3):
-			seedwordPos.append(geneLines[i].index(max(geneLines[i])))
-
-		# nacheinander die drei Zeilen des Haikus erzeugen
-		for i in range(3):
-
-			# leere Zeile erzeugen
-			line = []
-			if i == 1:
-				for j in range(7): line.append("")
-			else:
-				for j in range(5): line.append("")
-
-			# Seedwort finden und in Zeile schreiben
-			if i == 0:
-				seedword = genotype[0]
-			else:
-				# das nicht benutzte Gen aus der vorigen Zeile hilft beim Erzeugen des Seedworts in dieser Zeile
-				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]])
-				words = Thesaurus(genotype[0], g, ) # das g-te Thesaurusergebnis wird Seedwort
-				seedword = words.pop()[0] # Thesaurus stellt das Synonymwort im Ergebnis an Pos. 0
-			line.pop(seedwordPos[i])
-			line.insert(seedwordPos[i], seedword)
-
-			# Zeile nach links vervollstaendigen
-			if seedwordPos[i] != 0:
-				for j in range(seedwordPos[i]-1, -1, -1):
-					words = LeftNeighbours(line[j+1], self.__char2int(geneLines[i][j]))
-
-					if len(words) == 0: # pruefen, ob die Neighbours-Liste leer ist
-						word = "Ersatz"
-					else:
-						word = words.pop()[0] # LeftNeighbours stellt das Nachbarwort im Ergebnis an Pos. 0
-
-					line.pop(j)
-					line.insert(j, word)
-
-			# Zeile nach rechts vervollstaendigen
-			if seedwordPos[i] != len(geneLines[i])-1:
-				for j in range(seedwordPos[i]+1, len(geneLines[i])):
-					words = RightNeighbours(line[j-1], self.__char2int(geneLines[i][j]))
-
-					if len(words) == 0: # pruefen, ob die Neighbours-Liste leer ist
-						word = "Ersatz"
-					else:
-						word = words.pop()[1] # RightNeighbours stellt das Nachbarwort im Ergebnis an Pos. 1
-
-					line.pop(j)
-					line.insert(j, word)
-
-			phenotype.append(" ".join(line))
-
-		p = "\n".join(phenotype)
-
-		# Falls der Genotyp der Instanz entwickelt wurde: Phaenotyp speichern
-		if genotype == self.getGenotype():
-			self.__phenotype = p
-		return p
-
-
 	def __developLR575Syllables(self):
 		u"""__developLR575Syllables() erzeugt ein Haiku aus 5-7-5
 			Silben. Wie bei __developLR575Words() wird in jeder Zeile
@@ -397,14 +315,11 @@ class AutoPoemSpecimen:
 			jede Mutation eine konkrete Phaenotypenveraenderung
 			hervorrufen wuerde.
 		"""
-		print "LR575Syl: Credentials sind", WORTSCHATZ_CREDENTIALS #DEBUG
 		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
 
 		# Position des Seedworts in der jeweiligen Zeile ermitteln. Zurzeit nehme ich die Position des Gens mit dem niedrigsten Wert
 		for i in range(3):
 			seedwordPos.append(geneLines[i].index(min(geneLines[i])))
-#		print "seedwordPos:", seedwordPos #DEBUG
-#		print "geneLines:", geneLines #DEBUG
 
 		# Wortgrundform von Seedwort suchen
 		baseseed = libleipzig.Baseform(self.getGenotype()[0], auth=WORTSCHATZ_CREDENTIALS)
@@ -432,29 +347,24 @@ class AutoPoemSpecimen:
 
 				# Thesaurus
 				words = libleipzig.Similarity(lineSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
-#				print len(words), [w[1] for w in words] #DEBUG
 
 				# Seedwort aus Rueckgabeliste auswaehlen
 				while len(words) > 0:
 					j = g % len(words) - 1
-#					print "Zeile", i, ", Seedwort: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					seedword = words.pop(j)[1] # words[j] ist Liste mit dem Synonymwort an Pos. 0 (Similarity: Pos. 1)
 					if self.countSyllables(seedword) > 0:
 						line1Seed = seedword
 						break
-#			print "Das Seedwort lautet", seedword #DEBUG
 
 			# Zahl der freien Silben rechts und links errechnen
 			# @TODO: Was tun, wenn Seedwort zu lang fuer die Zeile?
 			line, s, syllableNo = seedword, self.countSyllables(seedword), len(geneLines[i])
-			print i, geneLines[i], syllableNo #DEBUG
-			if s + seedwordPos[i] > syllableNo:#
+			if s + seedwordPos[i] > syllableNo:
 				freeSyllablesRight = 0
 				seedwordPos[i] = syllableNo - s
 			else:
 				freeSyllablesRight = syllableNo - s - seedwordPos[i]
 			freeSyllablesLeft = seedwordPos[i]
-#			print syllableNo, seedwordPos[i], freeSyllablesRight, freeSyllablesLeft #DEBUG
 
 			# Zeile nach links vervollstaendigen
 			while freeSyllablesLeft > 0:
@@ -463,19 +373,15 @@ class AutoPoemSpecimen:
 				words = libleipzig.LeftNeighbours(line.split()[0], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
 					j = g % len(words) - 1
-#					print "Zeile", i, ", links: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					tmpWord = words.pop(j)[0] # words[j] ist Liste mit dem Nachbarwort an Pos. 0
-#					print "tmpWort links lautet", tmpWord, "und hat", self.countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
 					if lTmp > freeSyllablesLeft or lTmp == 0:
 						continue
 					else:
 						word = tmpWord
 						break
-#				print "lWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				freeSyllablesLeft -= self.countSyllables(word)
 				line = word + " " + line
-#				print line, freeSyllablesLeft #DEBUG
 
 			# Zeile nach rechts vervollstaendigen
 			while freeSyllablesRight > 0:
@@ -484,19 +390,15 @@ class AutoPoemSpecimen:
 				words = libleipzig.RightNeighbours(line.split()[-1], g, auth=WORTSCHATZ_CREDENTIALS)
 				while len(words) > 0:
 					j = g % len(words) - 1
-#					print "Zeile", i, ", rechts: len(words) ist", len(words), ", g ist", g, " und der Rest - 1 ist", j #DEBUG
 					tmpWord = words.pop(j)[1] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 1
-					#print "tmpWort rechts lautet", tmpWord, "und hat", countSyllables(tmpWord), "Silben" #DEBUG
 					lTmp = self.countSyllables(tmpWord)
 					if lTmp > freeSyllablesRight or lTmp == 0:
 						continue
 					else:
 						word = tmpWord
 						break
-#				print "rWort lautet", word, "und hat", countSyllables(word), "Silben" #DEBUG
 				line = line + " " + word
 				freeSyllablesRight -= self.countSyllables(word)
-#				print line, freeSyllablesRight #DEBUG
 
 			phenotype.append(line)
 
