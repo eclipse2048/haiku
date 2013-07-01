@@ -32,8 +32,8 @@ from httplib import HTTPConnection
 
 # Umgebungsvariablen mit Credentials fuer die Wortschatz-API einlesen
 WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
-if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
-	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
+#if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
+#	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
 
 # Konstanten fuer die Silbenzaehlung
 VOWELS_DE = u"aeiouyäöü"
@@ -74,7 +74,12 @@ u"""Liste der Wortarten fuer den Left/RightCollocationFinder(). A =
 """
 
 # Stoppwoerter einlesen
-f = open("static/nltk-corpus-stopwords-german.txt", "r")
+corpusFile = "nltk-corpus-stopwords-german.txt"
+if os.environ.has_key("OPENSHIFT_REPO_DIR"):
+	filename = os.environ["OPENSHIFT_REPO_DIR"] + "wsgi/static/" + corpusFile
+else:
+	filename = "static/" + corpusFile
+f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
 #from nltk.corpus import stopwords

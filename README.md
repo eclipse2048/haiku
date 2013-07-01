@@ -1,3 +1,9 @@
-The OpenShift `python` cartridge documentation can be found at:
+Automatoetry - Haikus mit Mensch und Maschine
 
-https://github.com/openshift/origin-server/tree/master/cartridges/openshift-origin-cartridge-python/README.md
+Hier lässt sich das Programm auprobieren (hosted by Openshift): http://haiku.tradloff.rhcloud.com
+
+Dependencies:
+- libleipzig
+- web.py
+
+Autor: Tobias Radloff, mail [at] tobias-radloff [Punkt] de
