@@ -79,6 +79,7 @@ if os.environ.has_key("OPENSHIFT_REPO_DIR"):
 	filename = os.environ["OPENSHIFT_REPO_DIR"] + "wsgi/static/" + corpusFile
 else:
 	filename = "static/" + corpusFile
+	print "Stoppworte einlesen: lokale Umgegung erkannt. Dateiname ist", filename
 f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
