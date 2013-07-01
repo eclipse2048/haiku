@@ -36,7 +36,7 @@ jQuery(document).ready( function() {
 		},
 		error: function(xhr, status, error) {
 			console.log("/do Initialer AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>');
+			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>'); // @TODO: Reload-Link angeben
 		},
 		complete: function() {	jQuery("#loading").hide(); },
 	});
@@ -77,6 +77,7 @@ jQuery(document).ready( function() {
 				jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder laden Sie neu.</p>');
 
 				// verstecktes Kind wieder anzeigen
+				// @TODO: Das fkt. nicht wirklich gut, glaube ich. Ich muss mal verschiedene Fehlerszenarien im Zus.spiel zw. POST() und dieser Fkt. durchgehen, damit ich in jedem Fehlerfall den Originalzustand wiederherstellen kann
 				jQuery("tr.older:last td.child").eq(1-lr).removeAttr("colspan");
 				jQuery("tr.older:last td.child").eq(lr).show();
 			},

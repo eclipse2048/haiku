@@ -107,8 +107,6 @@ class start:
 		"""
 		global myPoem
 		myPoem = AutoPoemSpecimen()
-
-		# Formular erzeugen und mit Werten fuellen
 		f = self.form()
 		f["seedword"].set_value(myPoem.getGenotype()[0])
 		f["genes"].set_value(myPoem.getGenotype()[1])
@@ -126,7 +124,6 @@ class start:
 		global myPoem
 		input = web.input()
 		print "/ POST: input ist", input #DEBUG
-
 		# "Los"-Button
 		if not input.has_key("caller"):
 			f = self.form()
@@ -135,7 +132,6 @@ class start:
 			myPoem = AutoPoemSpecimen(f.d.seedword, f.d.genes)
 			print "/ POST: Elter lautet", myPoem.getGenotype() #DEBUG
 			raise web.seeother("do")
-
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
 		if input["caller"] == "newSeedword":
 			print "/ POST: Neues Seedword angefordert" #DEBUG
@@ -158,9 +154,7 @@ class automatoetry:
 			(den Phaenotyp als Liste von Zeilen).
 		"""
 		# @NICE2HAVE: Redirect nach /, falls die Seite anders als durch seeother()  aufgerufen wurde
-
 		global myPoem
-		print "/do GET: Genotyp ist", myPoem.getGenotype() #DEBUG
 		# @TODO: getPhenotype()-Aufruf in try: except HaikuError-Block einbetten. Problem: Wenn Fehler, wie gebe ich den an die Ajax-Fkt. weiter?
 		phenotype = myPoem.getPhenotype()
 		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], phenotype.split("\n"))
@@ -170,11 +164,11 @@ class automatoetry:
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt die zwei neue Kinder zurueck.
 		"""
-
 		global myPoem
 		input = web.input()
 		print "/do POST: input ist:", input #DEBUG
 		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
+# @BUGFIX: die Kombination Openshift / Firefox ergibt in jeder neuer Generation einmal myPoem.getChildren() == []. Warum?
 
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
