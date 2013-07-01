@@ -123,13 +123,12 @@ class start:
 			- Los-Button (Submit): Funktion erzeugt myPoem mit den
 			Werten aus dem Formular neu und ruft Seite "do" auf.
 		"""
-
 		global myPoem
-		input = web.input(Los="")
+		input = web.input()
 		print "/ POST: input ist", input #DEBUG
 
 		# "Los"-Button
-		if input["Los"] != "":
+		if not input.has_key("caller"):
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
