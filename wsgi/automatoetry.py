@@ -74,18 +74,16 @@ u"""Liste der Wortarten fuer den Left/RightCollocationFinder(). A =
 """
 
 # Stoppwoerter einlesen
+# Alt: from nltk.corpus import stopwords; STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 corpusFile = "nltk-corpus-stopwords-german.txt"
 if os.environ.has_key("OPENSHIFT_REPO_DIR"):
 	filename = os.environ["OPENSHIFT_REPO_DIR"] + "wsgi/static/" + corpusFile
-	print "Stoppworte einlesen: Openshift-Umgegung erkannt. Dateiname ist", filename #DEBUG
 else:
-	filename = "static/" + corpusFile
-	print "Stoppworte einlesen: lokale Umgegung erkannt. Dateiname ist", filename #DEBUG
+	filename = os.path.dirname(os.path.realpath(__file__)) + "/static/" + corpusFile
+print "Reading stopwords from file", filename #DEBUG
 f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
-#from nltk.corpus import stopwords
-#STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 
 
 class AutoPoemSpecimen:
@@ -612,7 +610,6 @@ def main():
 	myPoem = AutoPoemSpecimen()
 	print "Genotyp: ", myPoem.getGenotype()
 	print u"\nPhaenotyp LRColloc:\n\n", myPoem.getPhenotype(function="LRColloc")
-	print u"\nPhaenotyp LR575Syls:\n\n", myPoem.getPhenotype(function="LR575Syllables")
 
 #	while True: # dieser Block fkt. so nicht mehr
 #		children = myPoem.procreateN([], 2)
