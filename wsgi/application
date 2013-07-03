@@ -53,13 +53,13 @@ web.config.debug = False
 if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
-	app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
+	application = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
 # erzeuge Session
 web.config.session_parameters.cookie_name = "haiku_session_id"
 if web.config.get('_session') is None:
 	tmpDir = tempfile.mkdtemp()
-	session = web.session.Session(app, web.session.DiskStore(tmpDir)) # tempfile.mkdtemp() statt tmpDir
+	session = web.session.Session(application, web.session.DiskStore(tmpDir)) # tempfile.mkdtemp() statt tmpDir
 	web.config._session = session
 else:
 	session = web.config._session
@@ -198,4 +198,4 @@ if __name__ == '__main__':
 		httpd = make_server('localhost', 80, application)
 		httpd.serve_forever()
 	else: # starte lokal mit web.py
-		app.run()
+		application.run()
