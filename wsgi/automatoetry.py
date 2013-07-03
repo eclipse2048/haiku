@@ -38,7 +38,6 @@ WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
 #WORTSCHATZ_CREDENTIALS = (os.environ.get("WORTSCHATZ_USER", "anonymous"), os.environ.get("WORTSCHATZ_PASSWORD", "anonymous"))
 
 
-
 # Konstanten fuer die Silbenzaehlung
 VOWELS_DE = u"aeiouyäöü"
 u"""Vokale der deutschen Sprache, einschliesslich "y" und Umlaute.
@@ -91,7 +90,7 @@ f.close()
 #STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 
 
-class AutoPoemSpecimen:
+class Haiku:
 	u"""@TODO: Einleitende Beschreibung fehlt.
 
 		Der Genotyp ist eine List mit zwei Elementen. Das erste Element
@@ -114,21 +113,20 @@ class AutoPoemSpecimen:
 				self.__genes = genes
 			else:
 				self.__genes = self.getRandomGenes()
-				print "AutoPoemSpecimen mit falsch aufgebauten Genen instanziiert:", genes, ". Verwende zufaellige Gene."
+				print "Haiku mit falsch aufgebauten Genen instanziiert:", genes, ". Verwende zufaellige Gene."
 		else:
 			self.__genes = self.getRandomGenes()
-		self.__generation = generation
-		self.__children = []
-		self.__phenotype = "" # @TODO Besser waere es, den Phaenotyp gleich hier aus dem Genotyp zu erzeugen. Dazu muss die Develop-Funktion aber schnell und zuverlaessig arbeiten; mehrere Sekunden Wartezeit fuer eine simple Instanziierung sind zu viel.
-		self.__randGen = random.Random()
-		self.__defaultDevFunc = "LRColloc" #DEBUG: "Loremipsum"
+		self.__generation, self.__children, self.__randGen = generation, [], random.Random()
+#		self.__defaultDevFunc = "Loremipsum" #DEBUG
+		self.__defaultDevFunc = "LRColloc"
+		self.__phenotype = ""
 
 
 	def __repr__(self):
 		u"""@TODO: Beschreibung fehlt"""
-		poem = u'\nAutoPoemSpecimen der Generation ' + unicode(self.getGeneration()) + u'.'
+		poem = u'Haiku der Generation ' + unicode(self.getGeneration()) + u'.'
 		poem += u'\nSeedwort: "' + self.getGenotype()[0] + u'", Gene: "' + self.getGenotype()[1] + u'", Phänotyp:'
-		poem += u'\n\t"' + U'\n\t'.join(self.__phenotype.split("\n")) + u'"'
+		poem += u'\n\t"' + U'\n\t'.join(self.__phenotype.split("\n")) + u'"\n'
 		return poem.encode("utf-8")
 
 	def getRandomGenes(self):
@@ -180,16 +178,19 @@ class AutoPoemSpecimen:
 			werden muessen.
 		"""
 		# Ist Phaenotyp schon erzeugt worden?
-		if self.__phenotype != "":
+		if self.__phenotype:
 			return self.__phenotype
 
 		# Gut, dann eben jetzt
-		print "Calling develop function '" + self.getDefaultDevFunc() + "' mit Credentials", WORTSCHATZ_CREDENTIALS #DEBUG
+		print "Rufe Develop-Funktion '" + self.getDefaultDevFunc() + "' fuer Genotyp", self.getGenotype(), "mit Credentials", WORTSCHATZ_CREDENTIALS, "auf." #DEBUG
 		function = "_" + self.__class__.__name__ + "__develop" + self.getDefaultDevFunc()
 		phenotype = getattr(self, function).__call__() # Hier fange ich absichtlich keine Exceptions ab
-		if phenotype:
-			self.__phenotype = phenotype
-		return self.__phenotype
+		try:
+			phenotype = phenotype.decode("utf-8")
+		except UnicodeEncodeError, u:
+			pass
+		self.__phenotype = phenotype
+		return phenotype
 
 
 	def getGeneration(self):
@@ -217,9 +218,11 @@ class AutoPoemSpecimen:
 		u"""Rekursive Funktion, die die Zahl der Silben fuer ein
 			deutsches Wort zurueckgibt.
 		"""
+
 		# Manchmal gibt libleipzig merere Worte als ein einzelnes zurueck
 		if " " in word:
 			return sum([self.countSyllables(w) for w in word.split()])
+
 		# Sonderfall: Bindestrich
 		word = word.strip("-")
 		if "-" in word:
@@ -255,25 +258,35 @@ class AutoPoemSpecimen:
 			word = word.decode("utf-8")
 		except UnicodeEncodeError, u:
 			pass
-		# ist Wort in Liste mit Ausnahmen?
+
+		# Ausnahmen abfragen
 		if word in SYLLABLE_COUNT_EXCEPTIONS.keys():
 			return SYLLABLE_COUNT_EXCEPTIONS[word]
+
 		# Sonderzeichen eliminieren
 		if not word.isalnum():
 			word = "".join([w for w in word if w.isalnum() or w in u"'`-"]).rstrip(u"-")
+
 		# Sonderfall: Abkuerzung
 		if word.isupper():
 			return len(word) + word.count("Y") * 2 # "Ypsilon" hat zwei Silben mehr
+		if word[:-1].isupper() and word[-1] == u"s": # Plural-Abkuerzung
+			return len(word) - 1 + word.count("Y") * 2
+
 		word = word.lower()
+
 		# Sonderfall: Ziffern am Wortanfang (zB "1920er")
 		m = SYL_DIGITS_REGEXP.match(word)
 		if m != None:
 			return m.end() + self.countSyllables(word[m.end():])
+
 		# Sonderfall: "y<vokal>" ist eine Silbe -> "y" abschneiden
 		if SYL_Y_REGEXP.match(word):
 			word = word[1:]
+
 		# Sonderfall: "qu<vokal>" ist eine Silbe -> durch "qu" ersetzen
 		word = SYL_QU_REGEXP.sub("qu", word)
+
 		return __sylCount(list(word))
 
 
@@ -530,7 +543,7 @@ class AutoPoemSpecimen:
 
 
 	def procreate1(self):
-		u"""Gibt eine Instanz von AutoPoemSpecimen zurueck, deren
+		u"""Gibt eine Instanz von Haiku zurueck, deren
 			Genotyp eine Mutation des eigenen Genotyps ist.
 
 			Zurzeit wird ein Gen zufaellig ausgewaehlt und um eins oder
@@ -541,14 +554,15 @@ class AutoPoemSpecimen:
 		i, j = random.randint(0, 16), random.choice([-2, -1, 1, 2])
 		mutatedGene = chr(ord(genes[i]) + j)
 		newSeedword = self.getGenotype()[0] # @TODO: Mutation des Seedworts ermoeglichen
+
 		# Ueberlauf abfangen
 		if ord(mutatedGene) < 97:
 			mutatedGene = chr(ord(mutatedGene)+26)
 		elif ord(mutatedGene) > 122:
 			mutatedGene = chr(ord(mutatedGene)-26)
 		mutatedGenes = genes[:i] + mutatedGene + genes[i+1:]
-		# @TODO Sollte ich den Phaenotyp mit dem des Elter abgleichen, um identische Phaenotypen zu vermeiden? Andererseits wuerde ich damit Mutationsspruenge unmoeglich machen
-		return AutoPoemSpecimen(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self.getGeneration() + 1)
+
+		return Haiku(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self.getGeneration() + 1)
 
 
 	def procreateN(self, litterSize=2):
@@ -556,24 +570,22 @@ class AutoPoemSpecimen:
 			Genotyp der Instanz abstammen.
 
 			Anders als Procreate1() gibt diese Funktion die neuen Kinder
-			nicht nur zurueck (als Liste von AutoPoemSpecimen), sondern
-			speichert den Wurf zusaetzlich in der Instanz (wobei alle
-			existierenden Kinder ueberschrieben werden).
+			nicht nur zurueck (als Liste von Haikus), sondern
+			speichert den Wurf zusaetzlich in der Instanz, wobei alle
+			existierenden Kinder ueberschrieben werden.
 		"""
+
 		# Erstes Kind
 		self.__children = [self.procreate1(), ] # vorhandene Kinder werden ueberschrieben
 		if litterSize == 1:
 			return self.__children
+
 		# Kinder 2 bis n
 		for i in range(litterSize - 1):
 			while True:
-				newChild = self.procreate1()
-				isDistinct = True
-				# pruefen, ob das neue Kind mit einem der schon erzeugten Kinder identisch ist
-				# @TODO Phaenotypen miteinander vergleichen statt wie im Moment nur die Genotypen
+				newChild, isDistinct = self.procreate1(), True
 				for j in range(len(self.__children)):
 					if newChild.getGenotype() == self.__children[j].getGenotype():
-						# @TODO: Was tun, wenn die Develop-Fkt. keine Varianz erzeugt, d.h. alle Kinder sind gleich und die while-Schleife nie endet?
 						isDistinct = False
 						break
 				if isDistinct:
@@ -613,7 +625,7 @@ def chooseNewGeneration(autoPoem, children):
 
 
 def main():
-	myPoem = AutoPoemSpecimen()
+	myPoem = Haiku()
 	print "Genotyp: ", myPoem.getGenotype()
 	myPoem.setDefaultDevFunc("LRColloc")
 	print u"\nPhaenotyp LRColloc:\n\n", myPoem.getPhenotype()

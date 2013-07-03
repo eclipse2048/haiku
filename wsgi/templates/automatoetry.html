@@ -1,46 +1,20 @@
-$def with (seedword, genes, phenotype, generation)
+$def with (haiku)
 
-<!DOCTYPE html>
+$var jsfiles: /static/automatoetry.js
 
-<html>
-	<head>
-		<title>Automatoetry</title>
-		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
-<!--	@TODO		Favicon? -->
-<!--	@TODO		Weblink zu jQuery? -->
-		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script>
-		<script type="text/javascript" src="/static/automatoetry.js"></script>
-	</head>
+<table class="haiku">
+	<tr class="parent">
+		<td class="genCount">$haiku.getGeneration()</td>
+		<td colspan="2" class="phenotype" align="center" title="Seedwort: $haiku.getGenotype()[0] &#10;Gene: $haiku.getGenotype()[1]">(erzeuge Phänotyp...)</td>
+	</tr>
+	<tr class="empty"><br/></tr>
+	<tr class="latest">
+		<td colspan="3" align="center">
+			<div align="center" id="loading" style="display:none">
+				<img src="/static/ajax-loader.gif" />
+			</div>
+		</td>
+	</tr>
+</table>
 
-	<body>
-		<h2>Automatoetry</h2>
-		<p><b>Haikus mit Mensch und Maschine</b></p>
-		<p>
-			Wenn die Seite laenger als ca. eine Minute laedt, ist ein Fehler aufgetreten.
-			<br/>
-			Bitte starten Sie in diesem Fall <a href="/">neu</a>.
-		</p>
-		<table class="haiku">
-			<tr class="parent">
-				<td class="genCount">$generation</td>
-				<td colspan="2" align="center" title="Seedwort: $seedword&#10;Gene: $genes">
-					$for line in phenotype:
-						$line <br />
-				</td>
-			</tr>
-			<tr class="empty"><br/></tr>
-			<tr class="latest">
-				<td colspan="3" align="center">
-					<div align="center" id="loading">
-						<img src="/static/ajax-loader.gif" />
-					</div>
-				</td>
-			</tr>
-		</table>
-
-		<div class="errorMsg"></div>
-
-		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
-		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
-	</body>
-</html>
+<div class="errorMsg"></div>

@@ -1,40 +1,15 @@
 $def with (form)
 
-<!DOCTYPE html>
+$var jsfiles: /static/start.js
 
-<html>
-	<head>
-		<title>Automatoetry</title>
-		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
-<!--	@TODO		Favicon? -->
-<!--	@TODO		Weblink zu jQuery? -->
-		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script>
-		<script type="text/javascript" src="/static/start.js"></script>
-	</head>
+<form method="post" action="/" id="geneForm">
+	$:form.render()
+</form>
 
-	<body>
-		<h2>Automatoetry</h2>
-		<p><b>Haikus mit Mensch und Maschine</b></p>
-		<p>
-			Wenn die naechste Seite laenger als ca. 30 Sekunden laedt, ist ein Fehler aufgetreten.
-			<br/>
-			Bitte starten Sie in diesem Fall <a href="/">neu</a>.
-		</p>
+<div align="center" id="loading" style="display:none">
+	<img src="/static/ajax-loader.gif" />
+</div>
 
-		<form method="post" action="/" id="geneForm">
-			$:form.render()
-		</form>
+<div class="errorMsg"></div>
 
-		<div align="center" id="loading" style="display:none">
-			<img src="/static/ajax-loader.gif" />
-		</div>
-
-		<div class="errorMsg"></div>
-
-		<p>
-			Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a><br/>
-			Zufallswort: <a href="http://www.wordreference.com">WordReference.com</a>
-		</p>
-		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
-	</body>
-</html>
+<p>Zufallswort: <a href="http://www.wordreference.com">WordReference.com</a></p>

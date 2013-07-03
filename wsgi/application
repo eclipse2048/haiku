@@ -21,11 +21,9 @@
 #  MA 02110-1301, USA.
 #
 
-
 from __future__ import division, absolute_import
 import os
 
-# lokal oder Openshift?
 if "OPENSHIFT_PYTHON_DIR" in os.environ:
 	RUNS_ON_OPENSHIFT = True
 else:
@@ -45,24 +43,23 @@ if RUNS_ON_OPENSHIFT:
 import web
 import json
 import tempfile
-from automatoetry import AutoPoemSpecimen
-from copy import deepcopy
+from automatoetry import Haiku, GENES_REGEXP
 
 # Initialisierungsvariablen fuer web.py
 urls = ("/", "start", "/do", "automatoetry")
-render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
-web.config.debug = True #DEBUG
+render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/", base="layout")
+web.config.debug = False
 
 if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
 	app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
-# Session-Parameter
+# erzeuge Session
 web.config.session_parameters.cookie_name = "haiku_session_id"
-tmpDir = tempfile.mkdtemp()
 if web.config.get('_session') is None:
-	session = web.session.Session(app, web.session.DiskStore(tmpDir))
+	tmpDir = tempfile.mkdtemp()
+	session = web.session.Session(app, web.session.DiskStore(tmpDir)) # tempfile.mkdtemp() statt tmpDir
 	web.config._session = session
 else:
 	session = web.config._session
@@ -75,7 +72,6 @@ class start:
 		Generation 1 bestimmt. Das zugehoerige Template ist
 		"templates/start.html".
 	"""
-	# @TODO: Auswahlkaestchen fuer die Developfkt. hinzufuegen
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
@@ -93,7 +89,7 @@ class start:
 			"genes",
 			web.form.notnull,
 			web.form.regexp(r"^[a-z ]*$", "Bitte nur Kleinbuchstaben"),
-			web.form.regexp(r"^[a-z]{5} [a-z]{7} [a-z]{5}$", "Gene muessen 5, 7, 5 Zeichen enthalten, jeweils durch Leerzeichen getrennt"), #
+			web.form.regexp(GENES_REGEXP.pattern, "Gene muessen 5, 7, 5 Zeichen enthalten, jeweils durch Leerzeichen getrennt"),
 			size = 19,
 			maxlength = 19,
 			class_ = "textfield",
@@ -115,8 +111,8 @@ class start:
 		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
 			mit Zufallswerten.
 		"""
-		session.kill() # erzeugt automatisch neue Session
-		tmpHaiku = AutoPoemSpecimen()
+		session.kill() # erzwingt Session
+		tmpHaiku = Haiku()
 		f = self.form()
 		f["seedword"].set_value(tmpHaiku.getGenotype()[0])
 		f["genes"].set_value(tmpHaiku.getGenotype()[1])
@@ -139,11 +135,11 @@ class start:
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
-			session.haiku = AutoPoemSpecimen(f.d.seedword, f.d.genes)
+			session.haiku = Haiku(f.d.seedword, f.d.genes)
 			raise web.seeother("do")
 
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
-		tmpPoem = AutoPoemSpecimen()
+		tmpPoem = Haiku()
 		if input["caller"] == "newSeedword":
 			return tmpPoem.getRandomSeedword()
 		elif input["caller"] == "newGenes":
@@ -163,27 +159,26 @@ class automatoetry:
 		"""
 		if not "haiku" in session:
 			raise web.seeother("/")
-		print "/do GET: Hole Phaenotyp fuer Generation", session.haiku.getGeneration()
-# @TODO: getPhenotype()-Aufruf in try: except HaikuError-Block einbetten. Problem: Wenn Fehler, wie gebe ich den an die Ajax-Fkt. weiter?
-		phenotype = session.haiku.getPhenotype()
-		return render.automatoetry(session.haiku.getGenotype()[0], session.haiku.getGenotype()[1], phenotype.split("\n"), session.haiku.getGeneration())
-# @TODO: Hier sollte ich nicht den Phaenotypen mit uebergeben, damit die Seite erst mal laedt. Wenn ich den Phaenotypen per Ajax-Request nachfordere, erreiche ich, dass die Seite bei einem Wortschatz-Serverfehler nicht ausschließlich aus einer Fehlermeldung besteht. Andererseits sollte das Problem von alleine weggehen, sobald ich ein Header/Footer-Template verwende.
+		return render.automatoetry(session.haiku)
 
 
 	def POST(self):
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt die zwei neue Kinder zurueck.
 		"""
+		if not "haiku" in session:
+			raise web.seeother("/")
 		input = web.input()
 		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
-		# Welches Kind wird neuer Elter?
-		if input["child"] == "l":
-			parent = session.haiku.getChildren()[0]
-		elif input["child"] == "r":
-			parent = session.haiku.getChildren()[1]
-		else: # initialer Ajax-Aufruf
+		if input.query == "0": # initialer Ajax-Aufruf Teil 1
+			return json.dumps(session.haiku.getPhenotype())
+		elif input.query == "1": # initialer Ajax-Aufruf Teil 2
 			parent = session.haiku
+		elif input.query == "l": # Linkes Kind
+			parent = session.haiku.getChildren()[0]
+		elif input.query == "r": # Rechtes Kind
+			parent = session.haiku.getChildren()[1]
 
 		# neue Kinder erzeugen
 		children = parent.procreateN(2)
@@ -192,8 +187,7 @@ class automatoetry:
 		if parent != session.haiku:
 			session.haiku = parent
 
-		# Daten im JSON-Format zurueckgeben
-		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype().replace("\n", "<br/>")] for c in children]
+		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
 		return json.dumps(data)
 

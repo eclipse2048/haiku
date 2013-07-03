@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
 	console.log("/ Document is ready.");
 
 	// Den "Neue/s..."-Buttons Event-Handler zuweisen.
-	// Der "Los"-Button schickt das Formular von alleine ab
+	// "Los" schickt das Formular von alleine ab
 	jQuery("table").on("click", "tr .button", function() {
 		jQuery("div.errorMsg").html("");
 		jQuery("#loading").show();
@@ -35,18 +35,12 @@ jQuery(document).ready(function() {
 		return false;
 	});
 
-	// Enter-Taste in einem der Textfelder sendet das Formular ab
+	// Enter-Taste in einem der Textfelder sendet das Formular ebenfalls ab
 	jQuery(".textfield").keypress(function(e) {
 		if (e.which == 13) {
 			jQuery("button#Los").trigger("click");
 			return false;
 		}
-	});
-
-	// zusaetzlichen Event-Handler fuers Submitten des Formulars setzen
-	jQuery("form#geneForm").submit( function() {
-		jQuery("#loading").show();
-		return true;
 	});
 
 });
