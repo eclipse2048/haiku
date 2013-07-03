@@ -1,4 +1,4 @@
-$def with (seedword, genes, phenotype)
+$def with (seedword, genes, phenotype, generation)
 
 <!DOCTYPE html>
 
@@ -22,7 +22,7 @@ $def with (seedword, genes, phenotype)
 		</p>
 		<table class="haiku">
 			<tr class="parent">
-				<td class="genCount">0</td>
+				<td class="genCount">$generation</td>
 				<td colspan="2" align="center" title="Seedwort: $seedword&#10;Gene: $genes">
 					$for line in phenotype:
 						$line <br />
@@ -40,7 +40,7 @@ $def with (seedword, genes, phenotype)
 
 		<div class="errorMsg"></div>
 
-		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universitaet Leipzig</a></p>
+		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
 		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
 	</body>
 </html>

@@ -26,7 +26,7 @@ from __future__ import division, absolute_import
 import os
 
 # lokal oder Openshift?
-if os.environ.has_key("OPENSHIFT_PYTHON_DIR"):
+if "OPENSHIFT_PYTHON_DIR" in os.environ:
 	RUNS_ON_OPENSHIFT = True
 else:
 	RUNS_ON_OPENSHIFT = False
@@ -41,22 +41,32 @@ if RUNS_ON_OPENSHIFT:
 	except IOError:
 		pass
 
-# Zusaetzliche Module erst ab hier importieren (wg. Openshift virtual environment)
-import web # @NICE2HAVE: Von web.py auf flask umstellen
+# Zusaetzliche Module erst ab hier importieren wg. Openshift virtenv
+import web
 import json
+import tempfile
 from automatoetry import AutoPoemSpecimen
+from copy import deepcopy
 
 # Initialisierungsvariablen fuer web.py
 urls = ("/", "start", "/do", "automatoetry")
 render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/")
-#web.config.debug = False
+web.config.debug = True #DEBUG
+
 if RUNS_ON_OPENSHIFT:
 	application = web.application(urls, globals()).wsgifunc()
 else:
 	app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 
-# globale Haiku-Variable
-myPoem = AutoPoemSpecimen() # Instanziierung vermeidet evtl. Reload-Fehler nach einem Programmneustart
+# Session-Parameter
+web.config.session_parameters.cookie_name = "haiku_session_id"
+tmpDir = tempfile.mkdtemp()
+if web.config.get('_session') is None:
+	session = web.session.Session(app, web.session.DiskStore(tmpDir))
+	web.config._session = session
+else:
+	session = web.config._session
+print "application: Tempdir ist", tmpDir #DEBUG
 
 
 class start:
@@ -105,11 +115,11 @@ class start:
 		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
 			mit Zufallswerten.
 		"""
-		global myPoem
-		myPoem = AutoPoemSpecimen()
+		session.kill() # erzeugt automatisch neue Session
+		tmpHaiku = AutoPoemSpecimen()
 		f = self.form()
-		f["seedword"].set_value(myPoem.getGenotype()[0])
-		f["genes"].set_value(myPoem.getGenotype()[1])
+		f["seedword"].set_value(tmpHaiku.getGenotype()[0])
+		f["genes"].set_value(tmpHaiku.getGenotype()[1])
 		return render.start(f)
 
 
@@ -118,27 +128,26 @@ class start:
 			Je nach Aufrufer wird unterschiedlich verfahren:
 			- Neues Seedwort / Neue Gene: Funktion gibt neue
 			Zufallswerte zurueck
-			- Los-Button (Submit): Funktion erzeugt myPoem mit den
+			- Los-Button (Submit): Funktion erzeugt haiku mit den
 			Werten aus dem Formular neu und ruft Seite "do" auf.
 		"""
-		global myPoem
 		input = web.input()
-		print "/ POST: input ist", input #DEBUG
+		print "/ POST: input ist", input, "und die Session-ID lautet", session.session_id #DEBUG
+
 		# "Los"-Button
-		if not input.has_key("caller"):
+		if "caller" not in input:
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
-			myPoem = AutoPoemSpecimen(f.d.seedword, f.d.genes)
-			print "/ POST: Elter lautet", myPoem.getGenotype() #DEBUG
+			session.haiku = AutoPoemSpecimen(f.d.seedword, f.d.genes)
 			raise web.seeother("do")
+
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
+		tmpPoem = AutoPoemSpecimen()
 		if input["caller"] == "newSeedword":
-			print "/ POST: Neues Seedword angefordert" #DEBUG
-			return myPoem.getRandomSeedword()
+			return tmpPoem.getRandomSeedword()
 		elif input["caller"] == "newGenes":
-			print "/ POST: Neue Gene angefordert" #DEBUG
-			return myPoem.getRandomGenes()
+			return tmpPoem.getRandomGenes()
 
 
 class automatoetry:
@@ -148,40 +157,45 @@ class automatoetry:
 		Template ist "templates/automatoetry.html".
 	"""
 
-
 	def GET(self):
 		u"""Gibt Seedwort, Gene und Phaenotyp fuer Generation 1 zurueck
 			(den Phaenotyp als Liste von Zeilen).
 		"""
-		# @NICE2HAVE: Redirect nach /, falls die Seite anders als durch seeother()  aufgerufen wurde
-		global myPoem
-		# @TODO: getPhenotype()-Aufruf in try: except HaikuError-Block einbetten. Problem: Wenn Fehler, wie gebe ich den an die Ajax-Fkt. weiter?
-		phenotype = myPoem.getPhenotype()
-		return render.automatoetry(myPoem.getGenotype()[0], myPoem.getGenotype()[1], phenotype.split("\n"))
+		if not "haiku" in session:
+			raise web.seeother("/")
+		print "/do GET: Hole Phaenotyp fuer Generation", session.haiku.getGeneration()
+# @TODO: getPhenotype()-Aufruf in try: except HaikuError-Block einbetten. Problem: Wenn Fehler, wie gebe ich den an die Ajax-Fkt. weiter?
+		phenotype = session.haiku.getPhenotype()
+		return render.automatoetry(session.haiku.getGenotype()[0], session.haiku.getGenotype()[1], phenotype.split("\n"), session.haiku.getGeneration())
+# @TODO: Hier sollte ich nicht den Phaenotypen mit uebergeben, damit die Seite erst mal laedt. Wenn ich den Phaenotypen per Ajax-Request nachfordere, erreiche ich, dass die Seite bei einem Wortschatz-Serverfehler nicht ausschließlich aus einer Fehlermeldung besteht. Andererseits sollte das Problem von alleine weggehen, sobald ich ein Header/Footer-Template verwende.
 
 
 	def POST(self):
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt die zwei neue Kinder zurueck.
 		"""
-		global myPoem
 		input = web.input()
-		print "/do POST: input ist:", input #DEBUG
-		print "/do POST: Kinder des Elter sind", myPoem.getChildren() #DEBUG
-# @BUGFIX: die Kombination Openshift / Firefox ergibt in jeder neuer Generation einmal myPoem.getChildren() == []. Warum?
+		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
 		# Welches Kind wird neuer Elter?
 		if input["child"] == "l":
-			myPoem = myPoem.getChildren()[0]
+			parent = session.haiku.getChildren()[0]
 		elif input["child"] == "r":
-			myPoem = myPoem.getChildren()[1]
-		print "/do POST: Neuer Elter ist:", myPoem.getGenotype() #DEBUG
+			parent = session.haiku.getChildren()[1]
+		else: # initialer Ajax-Aufruf
+			parent = session.haiku
 
-		# Kinder erzeugen und als JSON-Objekt zurueckgeben
-		children = myPoem.procreateN(2)
-		print "/do POST: Kinder sind erzeugt" #DEBUG
-# @TODO: getPhenotype()-Aufrufe in try: except HaikuError-Block einbetten
-		return json.dumps([[child.getGenotype(), child.getPhenotype().replace("\n", "<br/>")] for child in children])
+		# neue Kinder erzeugen
+		children = parent.procreateN(2)
+		for c in children:
+			c.getPhenotype()
+		if parent != session.haiku:
+			session.haiku = parent
+
+		# Daten im JSON-Format zurueckgeben
+		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype().replace("\n", "<br/>")] for c in children]
+		data.append(str(children[0].getGeneration()))
+		return json.dumps(data)
 
 
 if __name__ == '__main__':

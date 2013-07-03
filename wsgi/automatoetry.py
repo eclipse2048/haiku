@@ -32,8 +32,12 @@ from httplib import HTTPConnection
 
 # Umgebungsvariablen mit Credentials fuer die Wortschatz-API einlesen
 WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
-#if os.environ.has_key("WORTSCHATZ_USER") and os.environ.has_key("WORTSCHATZ_PASSWORD"):
+#if "WORTSCHATZ_USER" in os.environ and "WORTSCHATZ_PASSWORD" in os.environ:
 #	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
+## Alternative (fuer wenn das Problem mit dem Call-Limit geloest ist):
+#WORTSCHATZ_CREDENTIALS = (os.environ.get("WORTSCHATZ_USER", "anonymous"), os.environ.get("WORTSCHATZ_PASSWORD", "anonymous"))
+
+
 
 # Konstanten fuer die Silbenzaehlung
 VOWELS_DE = u"aeiouyäöü"
@@ -59,7 +63,7 @@ u"""Dictionary mit Woertern, die anders getrennt werden als nach den
 """
 
 # Regulaere Ausdruecke fuer __init__() und countSyllables()
-GENES_REGEXP = re.compile(r"[a-z]{5} [a-z]{7} [a-z]{5}$")
+GENES_REGEXP = re.compile(r"^[a-z]{5} [a-z]{7} [a-z]{5}$")
 SYL_DIGITS_REGEXP = re.compile(r"\d+")
 SYL_QU_REGEXP = re.compile(ur"qu[aeiouäöüy]")
 SYL_Y_REGEXP = re.compile(ur"y[aeiouäöü]")
@@ -74,16 +78,17 @@ u"""Liste der Wortarten fuer den Left/RightCollocationFinder(). A =
 """
 
 # Stoppwoerter einlesen
-# Alt: from nltk.corpus import stopwords; STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 corpusFile = "nltk-corpus-stopwords-german.txt"
-if os.environ.has_key("OPENSHIFT_REPO_DIR"):
+if "OPENSHIFT_REPO_DIR" in os.environ:
 	filename = os.environ["OPENSHIFT_REPO_DIR"] + "wsgi/static/" + corpusFile
 else:
 	filename = os.path.dirname(os.path.realpath(__file__)) + "/static/" + corpusFile
-print "Reading stopwords from file", filename #DEBUG
 f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
+## Alternative Methode zum Stoppwoertereinlesen (muss aber per nltk.ddownload() einmalig initiiert werden):
+#from nltk.corpus import stopwords
+#STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 
 
 class AutoPoemSpecimen:
@@ -98,28 +103,33 @@ class AutoPoemSpecimen:
 		sieben mit Zeile 2.
 	"""
 
-	def __init__(self, seedword=None, genes=None, parent=None):
+	def __init__(self, seedword=None, genes=None, generation=0):
 		u"""@TODO: Beschreibung fehlt
 		"""
 		self.__seedword = seedword or self.getRandomSeedword()
 		if genes:
-			# Ggf. Leerzeichen einfuegen
 			if len(genes) == 17 and " " not in genes:
 				genes = genes[:5] + " " + genes[5:12] + " " + genes[12:]
-			#  Gene richtig aufgebaut?
-			if not GENES_REGEXP.match(genes):
-				print "Fehler: AutoPoemSpecimen.__init__() mit falsch aufgebauten Genen aufgerufen. Verwende zufaellige Gene."
-				self.__genes = self.getRandomGenes()
-			else:
+			if GENES_REGEXP.match(genes):
 				self.__genes = genes
+			else:
+				self.__genes = self.getRandomGenes()
+				print "AutoPoemSpecimen mit falsch aufgebauten Genen instanziiert:", genes, ". Verwende zufaellige Gene."
 		else:
 			self.__genes = self.getRandomGenes()
-
-		self.__parent = parent
+		self.__generation = generation
 		self.__children = []
 		self.__phenotype = "" # @TODO Besser waere es, den Phaenotyp gleich hier aus dem Genotyp zu erzeugen. Dazu muss die Develop-Funktion aber schnell und zuverlaessig arbeiten; mehrere Sekunden Wartezeit fuer eine simple Instanziierung sind zu viel.
 		self.__randGen = random.Random()
+		self.__defaultDevFunc = "LRColloc" #DEBUG: "Loremipsum"
 
+
+	def __repr__(self):
+		u"""@TODO: Beschreibung fehlt"""
+		poem = u'\nAutoPoemSpecimen der Generation ' + unicode(self.getGeneration()) + u'.'
+		poem += u'\nSeedwort: "' + self.getGenotype()[0] + u'", Gene: "' + self.getGenotype()[1] + u'", Phänotyp:'
+		poem += u'\n\t"' + U'\n\t'.join(self.__phenotype.split("\n")) + u'"'
+		return poem.encode("utf-8")
 
 	def getRandomGenes(self):
 		u"""Erzeugt die Gene fuer ein zufaelliges Exemplar. Nuetzlich
@@ -153,10 +163,9 @@ class AutoPoemSpecimen:
 		wordEnd = page.find(" ", wordStart)
 		word = page[wordStart:wordEnd].rstrip("-,").rstrip()
 		try:
-			word = word.decode("utf-8")
+			return word.decode("utf-8")
 		except UnicodeEncodeError, u:
-			pass
-		return word
+			return word
 
 
 	def getGenotype(self):
@@ -165,47 +174,43 @@ class AutoPoemSpecimen:
 		return [self.__seedword, self.__genes]
 
 
-	def getPhenotype(self, function=""):
+	def getPhenotype(self):
 		u"""@TODO: Beschreibung fehlt. Darin muss erwaehnt werden, dass
 			diese Funktion Fehler weitergeben kann, die abgefangen
 			werden muessen.
-
-			Hier die alte Beschreibung von __develop():
-
-			Dummy-Funktion. Ruft diejenige __develop...()-Funktion auf,
-			deren Restname als Parameter uebergeben wird. __develop()
-			als Dummy ermoeglicht es, unterschiedliche Phaenotyp-
-			Algorithmen zu verwenden, ohne den Code zu veraendern
-			(Ausnahme: Default-Fkt.).
 		"""
 		# Ist Phaenotyp schon erzeugt worden?
 		if self.__phenotype != "":
 			return self.__phenotype
 
-		# Gut, dann erzeugen wir ihn eben jetzt
-		functions, funcPrefix = self.getDevelopFunctionNames(), "_" + self.__class__.__name__ + "__develop"
-		if function in functions:
-			funcName = function
-		else: # default
-			funcName = "LRColloc" # @TODO: Default-Fkt. zur Instanzvariable mit Getter/Setter-Methoden machen
-
-		print "Calling develop function '" + funcName + "()' mit Credentials", WORTSCHATZ_CREDENTIALS #DEBUG
-		phenotype = getattr(self, funcPrefix + funcName).__call__() # Hier fange ich absichtlich keine Exceptions ab
+		# Gut, dann eben jetzt
+		print "Calling develop function '" + self.getDefaultDevFunc() + "' mit Credentials", WORTSCHATZ_CREDENTIALS #DEBUG
+		function = "_" + self.__class__.__name__ + "__develop" + self.getDefaultDevFunc()
+		phenotype = getattr(self, function).__call__() # Hier fange ich absichtlich keine Exceptions ab
 		if phenotype:
 			self.__phenotype = phenotype
 		return self.__phenotype
 
 
-	def getParent(self):
+	def getGeneration(self):
 		u"""@TODO: Beschreibung fehlt
 		"""
-		return self.__parent
+		return self.__generation
 
 
 	def getChildren(self):
 		u"""@TODO: Beschreibung fehlt
 		"""
 		return self.__children
+
+
+	def setDefaultDevFunc(self, function):
+		if function in self.getDevFunctions():
+			self.__defaultDevFunc = function
+
+
+	def getDefaultDevFunc(self):
+		return self.__defaultDevFunc
 
 
 	def countSyllables(self, word):
@@ -215,6 +220,10 @@ class AutoPoemSpecimen:
 		# Manchmal gibt libleipzig merere Worte als ein einzelnes zurueck
 		if " " in word:
 			return sum([self.countSyllables(w) for w in word.split()])
+		# Sonderfall: Bindestrich
+		word = word.strip("-")
+		if "-" in word:
+			return sum([self.countSyllables(w) for w in word.split("-")])
 
 		def __sylCount(charList):
 			u"""Rekursive Funktion, die die naechste Vokalkette sucht
@@ -254,7 +263,7 @@ class AutoPoemSpecimen:
 			word = "".join([w for w in word if w.isalnum() or w in u"'`-"]).rstrip(u"-")
 		# Sonderfall: Abkuerzung
 		if word.isupper():
-			return len(word) + word.count("Y") * 2 # "Ypsilon" hat drei Silben
+			return len(word) + word.count("Y") * 2 # "Ypsilon" hat zwei Silben mehr
 		word = word.lower()
 		# Sonderfall: Ziffern am Wortanfang (zB "1920er")
 		m = SYL_DIGITS_REGEXP.match(word)
@@ -275,7 +284,7 @@ class AutoPoemSpecimen:
 		return string.ascii_lowercase.find(c.lower()) + 1
 
 
-	def getDevelopFunctionNames(self):
+	def getDevFunctions(self):
 		"""@TODO: Beschreibung fehlt
 		"""
 		classPrefix = "_" + self.__class__.__name__ + "__develop"
@@ -532,14 +541,14 @@ class AutoPoemSpecimen:
 		i, j = random.randint(0, 16), random.choice([-2, -1, 1, 2])
 		mutatedGene = chr(ord(genes[i]) + j)
 		newSeedword = self.getGenotype()[0] # @TODO: Mutation des Seedworts ermoeglichen
-		# Sonderfaelle abfangen
-		if mutatedGene == chr(96):
-			mutatedGene = "z"
-		elif mutatedGene == chr(123):
-			mutatedGene = "a"
+		# Ueberlauf abfangen
+		if ord(mutatedGene) < 97:
+			mutatedGene = chr(ord(mutatedGene)+26)
+		elif ord(mutatedGene) > 122:
+			mutatedGene = chr(ord(mutatedGene)-26)
 		mutatedGenes = genes[:i] + mutatedGene + genes[i+1:]
-		# @TODO Sollte ich den Phaenotyp mit dem des Elter abgleichen, um identische Phaenotypen zu vermeiden? Andererseits wuerde ich damit Mutationsspruenge von mehr als einem Gen und +/-1 unmoeglich machen
-		return AutoPoemSpecimen(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self)
+		# @TODO Sollte ich den Phaenotyp mit dem des Elter abgleichen, um identische Phaenotypen zu vermeiden? Andererseits wuerde ich damit Mutationsspruenge unmoeglich machen
+		return AutoPoemSpecimen(newSeedword, mutatedGenes[:5] + " " + mutatedGenes[5:12] + " " + mutatedGenes[12:], self.getGeneration() + 1)
 
 
 	def procreateN(self, litterSize=2):
@@ -551,28 +560,25 @@ class AutoPoemSpecimen:
 			speichert den Wurf zusaetzlich in der Instanz (wobei alle
 			existierenden Kinder ueberschrieben werden).
 		"""
-
 		# Erstes Kind
 		self.__children = [self.procreate1(), ] # vorhandene Kinder werden ueberschrieben
 		if litterSize == 1:
 			return self.__children
 		# Kinder 2 bis n
 		for i in range(litterSize - 1):
-			# So lange weitere Kinder erzeugen, bis keine zwei gleich sind
 			while True:
 				newChild = self.procreate1()
 				isDistinct = True
 				# pruefen, ob das neue Kind mit einem der schon erzeugten Kinder identisch ist
 				# @TODO Phaenotypen miteinander vergleichen statt wie im Moment nur die Genotypen
 				for j in range(len(self.__children)):
-					if newChild.getGenotype()[1] == self.__children[j].getGenotype()[1]:
-						# @TODO: Was tun, wenn die Varianz der Develop-Fkt. keine Varianz erzeugt, d.h. alle Kinder sind gleich und die while-Schleife nie endet?
+					if newChild.getGenotype() == self.__children[j].getGenotype():
+						# @TODO: Was tun, wenn die Develop-Fkt. keine Varianz erzeugt, d.h. alle Kinder sind gleich und die while-Schleife nie endet?
 						isDistinct = False
-						print "Leider keine unterschiedlichen Kinder. Der Genotyp ist", newChild.getGenotype() #DEBUG
 						break
 				if isDistinct:
+					self.__children.append(newChild)
 					break
-			self.__children.append(newChild)
 		return self.__children
 
 
@@ -609,7 +615,8 @@ def chooseNewGeneration(autoPoem, children):
 def main():
 	myPoem = AutoPoemSpecimen()
 	print "Genotyp: ", myPoem.getGenotype()
-	print u"\nPhaenotyp LRColloc:\n\n", myPoem.getPhenotype(function="LRColloc")
+	myPoem.setDefaultDevFunc("LRColloc")
+	print u"\nPhaenotyp LRColloc:\n\n", myPoem.getPhenotype()
 
 #	while True: # dieser Block fkt. so nicht mehr
 #		children = myPoem.procreateN([], 2)

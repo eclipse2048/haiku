@@ -21,15 +21,16 @@ Eine aktuelle Version des Programms lässt sich hier auprobieren: http://haiku-t
 ### Technische Details
 
 **Dependencies**
-- Python 2.6
-- web.py 0.34
-- libleipzig 1.3
-- jQuery 1.10.1
+* Python 2.6
+* web.py 0.34
+* libleipzig 1.3
 
 **Weitere Quellen**
-- Automatoetry nutzt die API von http://wortschatz.uni-leipzig.de
-- Zufallswort-Generator: http://wordreference.com/random/deen
-- Der deutsche Stoppwort-Corpus entstammt dem NLTK 2.0 (http://nltk.org)
+* Automatoetry nutzt die API von http://wortschatz.uni-leipzig.de
+* Zufallswort-Generator: http://wordreference.com/random/deen
+* Der deutsche Stoppwort-Corpus entstammt dem NLTK 2.0 (http://nltk.org)
+* jQuery 1.10.1
+
 
 ### Von wem ist Automatoetry?
 
