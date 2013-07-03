@@ -1,0 +1,32 @@
+$def with (content)
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Automatoetry - Haikus mit Mensch und Maschine</title>
+		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
+		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script><!-- @TODO Weblink zu jQuery? -->
+		$if content.jsfiles:
+			$for f in content.jsfiles.split():
+				<script type="text/javascript" src="$f"></script>
+<!-- @TODO Favicon? -->
+	</head>
+
+	<body>
+		<h2>Automatoetry</h2>
+		<p><b>Haikus mit Mensch und Maschine</b></p>
+		<table class="topmenu">
+			<tr>
+				<td><a href="/">Neustart</a></td>
+				<td><a href="https://github.com/tradloff/haiku">Source Code</a></td>
+				<td><a href="http://tobias-radloff.de/blog/">Autor</a></td>
+			</tr>
+		</table>
+
+		$:content
+
+		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
+		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
+	</body>
+</html>
