@@ -56,9 +56,11 @@ if RUNS_ON_OPENSHIFT:
 
 # erzeuge Session
 web.config.session_parameters.cookie_name = "haiku_session_id"
-#if RUNS_ON_OPENSHIFT:
-#	tempfile.tempdir = os.environ["OPENSHIFT_DATA_DIR"]
-session = web.session.Session(app, web.session.DiskStore(tempfile.mkdtemp()))
+if RUNS_ON_OPENSHIFT:
+	sessionsDir = os.environ["OPENSHIFT_DATA_DIR"] + "sessions/"
+else:
+	sessionsDir = tempfile.gettempdir() + "/sessions/"
+session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 #if web.config.get('_session') is None:
 #	session = web.session.Session(app, web.session.DiskStore(tmpDir))
 #	web.config._session = session
