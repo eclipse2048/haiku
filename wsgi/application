@@ -56,12 +56,14 @@ if RUNS_ON_OPENSHIFT:
 
 # erzeuge Session
 web.config.session_parameters.cookie_name = "haiku_session_id"
-if web.config.get('_session') is None:
-	tmpDir = tempfile.mkdtemp()
-	session = web.session.Session(app, web.session.DiskStore(tmpDir)) # tempfile.mkdtemp() statt tmpDir
-	web.config._session = session
-else:
-	session = web.config._session
+#if RUNS_ON_OPENSHIFT:
+#	tempfile.tempdir = os.environ["OPENSHIFT_DATA_DIR"]
+session = web.session.Session(app, web.session.DiskStore(tempfile.mkdtemp()))
+#if web.config.get('_session') is None:
+#	session = web.session.Session(app, web.session.DiskStore(tmpDir))
+#	web.config._session = session
+#else:
+#	session = web.config._session
 print "application: Tempdir ist", tmpDir #DEBUG
 
 
@@ -155,8 +157,8 @@ class automatoetry:
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt zwei neue Kinder zurueck.
 		"""
-		if not "haiku" in session:
-			raise web.seeother("/")
+#		if not "haiku" in session:
+#			raise web.seeother("/")
 		input = web.input()
 		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
@@ -168,6 +170,7 @@ class automatoetry:
 			parent = session.haiku.getChildren()[0]
 		elif input.query == "r": # Rechtes Kind
 			parent = session.haiku.getChildren()[1]
+		print "/do POST: Neuer Elter ist", parent #DEBUG
 
 		# neue Kinder erzeugen
 		children = parent.procreateN(2)
@@ -178,6 +181,7 @@ class automatoetry:
 
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
+		print "/do POST: Ajax-Aufruf fertig bearbeitet, Rueckgabedaten sind", data #DEBUG
 		return json.dumps(data)
 
 
