@@ -61,11 +61,6 @@ if RUNS_ON_OPENSHIFT:
 else:
 	sessionsDir = tempfile.gettempdir() + "/sessions/"
 session = web.session.Session(app, web.session.DiskStore(sessionsDir))
-#if web.config.get('_session') is None:
-#	session = web.session.Session(app, web.session.DiskStore(tmpDir))
-#	web.config._session = session
-#else:
-#	session = web.config._session
 
 
 class start:
@@ -104,9 +99,14 @@ class start:
 			mit Zufallswerten.
 		"""
 		print "/ GET: Session ID ist", session.session_id, "und session.haiku ist", "haiku" in session #DEBUG
-		tmpHaiku, f = Haiku(), self.form()
-		f["seedword"].set_value(tmpHaiku.getGenotype()[0])
-		f["genes"].set_value(tmpHaiku.getGenotype()[1])
+		f = self.form()
+		if "haiku" in session:
+			f["seedword"].set_value(session.haiku.getGenotype()[0])
+			f["genes"].set_value(session,haiku.getGenotype()[1])
+		else:
+			tmpHaiku = Haiku()
+			f["seedword"].set_value(tmpHaiku.getGenotype()[0])
+			f["genes"].set_value(tmpHaiku.getGenotype()[1])
 		return render.start(f)
 
 
@@ -119,7 +119,6 @@ class start:
 			Werten aus dem Formular neu und ruft Seite "do" auf.
 		"""
 		input = web.input()
-		print "/ POST: input ist", input, "und die Session-ID lautet", session.session_id #DEBUG
 
 		# "Los"-Button
 		if "caller" not in input:
@@ -158,7 +157,8 @@ class automatoetry:
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt zwei neue Kinder zurueck.
 		"""
-#		if not "haiku" in session:
+		if not "haiku" in session:
+			print "/do POST: Session enthaelt kein Haiku. Session ist", session #DEBUG
 #			raise web.seeother("/")
 		input = web.input()
 		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
