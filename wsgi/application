@@ -71,6 +71,7 @@ class start:
 		Generation 1 bestimmt. Das zugehoerige Template ist
 		"templates/start.html".
 	"""
+
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
@@ -79,11 +80,7 @@ class start:
 			class_ = "textfield",
 			description = "Startwort:"
 		),
-		web.form.Button(
-			"Neues Zufallswort",
-			id = "newSeedword",
-			class_ = "button"
-		),
+		web.form.Button("Neues Zufallswort", id = "newSeedword", class_ = "button"),
 		web.form.Textbox(
 			"genes",
 			web.form.notnull,
@@ -94,15 +91,8 @@ class start:
 			class_ = "textfield",
 			description = "Gene:"
 		),
-		web.form.Button(
-			"Neue Gene",
-			id = "newGenes",
-			class_ = "button"
-		),
-		web.form.Button(
-			"Los",
-			class_ = "los"
-		)
+		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
+		web.form.Button("Los", class_ = "los")
 	)
 
 
@@ -133,7 +123,6 @@ class start:
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
-			session.kill() # erzwingt neue Session
 			session.haiku = Haiku(f.d.seedword, f.d.genes)
 			raise web.seeother("do")
 
@@ -156,9 +145,9 @@ class automatoetry:
 		u"""Gibt Seedwort, Gene und Phaenotyp fuer Generation 1 zurueck
 			(den Phaenotyp als Liste von Zeilen).
 		"""
+		print "/do GET: Session-ID ist", session.session_id, "im Verzeichnis", session.store._get_path(session.session_id), "und das Session-Haiku ist", "haiku" in session #DEBUG
 		if not "haiku" in session:
 			raise web.seeother("/")
-		print "/do GET: Session-ID ist", session.session_id, "im Verzeichnis", session.store._get_path() #DEBUG
 		return render.automatoetry(session.haiku)
 
 
