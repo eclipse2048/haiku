@@ -110,9 +110,8 @@ class start:
 		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
 			mit Zufallswerten.
 		"""
-		session.kill() # erzwingt Session
-		tmpHaiku = Haiku()
-		f = self.form()
+		print "/ GET: Session ID ist", session.session_id, "und session.haiku ist", "haiku" in session #DEBUG
+		tmpHaiku, f = Haiku(), self.form()
 		f["seedword"].set_value(tmpHaiku.getGenotype()[0])
 		f["genes"].set_value(tmpHaiku.getGenotype()[1])
 		return render.start(f)
@@ -134,6 +133,7 @@ class start:
 			f = self.form()
 			if not f.validates():
 				return render.start(f)
+			session.kill() # erzwingt neue Session
 			session.haiku = Haiku(f.d.seedword, f.d.genes)
 			raise web.seeother("do")
 
@@ -158,12 +158,13 @@ class automatoetry:
 		"""
 		if not "haiku" in session:
 			raise web.seeother("/")
+		print "/do GET: Session-ID ist", session.session_id, "im Verzeichnis", session.store._get_path() #DEBUG
 		return render.automatoetry(session.haiku)
 
 
 	def POST(self):
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
-			Generation und gibt die zwei neue Kinder zurueck.
+			Generation und gibt zwei neue Kinder zurueck.
 		"""
 		if not "haiku" in session:
 			raise web.seeother("/")
