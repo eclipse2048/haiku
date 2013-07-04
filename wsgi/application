@@ -64,7 +64,6 @@ session = web.session.Session(app, web.session.DiskStore(tempfile.mkdtemp()))
 #	web.config._session = session
 #else:
 #	session = web.config._session
-print "application: Tempdir ist", tmpDir #DEBUG
 
 
 class start:
