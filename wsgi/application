@@ -102,7 +102,7 @@ class start:
 		f = self.form()
 		if "haiku" in session:
 			f["seedword"].set_value(session.haiku.getGenotype()[0])
-			f["genes"].set_value(session,haiku.getGenotype()[1])
+			f["genes"].set_value(session.haiku.getGenotype()[1])
 		else:
 			tmpHaiku = Haiku()
 			f["seedword"].set_value(tmpHaiku.getGenotype()[0])
