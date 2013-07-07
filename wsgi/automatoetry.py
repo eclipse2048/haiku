@@ -32,8 +32,8 @@ from httplib import HTTPConnection
 
 # Umgebungsvariablen mit Credentials fuer die Wortschatz-API einlesen
 WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
-#if "WORTSCHATZ_USER" in os.environ and "WORTSCHATZ_PASSWORD" in os.environ:
-#	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
+if "WORTSCHATZ_USER" in os.environ and "WORTSCHATZ_PASSWORD" in os.environ:
+	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
 ## Alternative (fuer wenn das Problem mit dem Call-Limit geloest ist):
 #WORTSCHATZ_CREDENTIALS = (os.environ.get("WORTSCHATZ_USER", "anonymous"), os.environ.get("WORTSCHATZ_PASSWORD", "anonymous"))
 

@@ -90,7 +90,7 @@ class start:
 			description = "Gene:"
 		),
 		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
-		web.form.Button("Los", class_ = "los")
+		web.form.Button("Los", class_ = "button")
 	)
 
 
@@ -100,13 +100,13 @@ class start:
 		"""
 		print "/ GET: Session ID ist", session.session_id, "und session.haiku ist", "haiku" in session #DEBUG
 		f = self.form()
-		if "haiku" in session:
-			f["seedword"].set_value(session.haiku.getGenotype()[0])
-			f["genes"].set_value(session.haiku.getGenotype()[1])
-		else:
-			tmpHaiku = Haiku()
-			f["seedword"].set_value(tmpHaiku.getGenotype()[0])
-			f["genes"].set_value(tmpHaiku.getGenotype()[1])
+#		if "haiku" in session:
+#			f["seedword"].set_value(session.haiku.getGenotype()[0])
+#			f["genes"].set_value(session.haiku.getGenotype()[1])
+#		else:
+		tmpHaiku = Haiku()
+		f["seedword"].set_value(tmpHaiku.getGenotype()[0])
+		f["genes"].set_value(tmpHaiku.getGenotype()[1])
 		return render.start(f)
 
 
@@ -119,6 +119,7 @@ class start:
 			Werten aus dem Formular neu und ruft Seite "do" auf.
 		"""
 		input = web.input()
+		print "/ POST: Input ist", input #DEBUG
 
 		# "Los"-Button
 		if "caller" not in input:
@@ -182,7 +183,6 @@ class automatoetry:
 
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
-		print "/do POST: Ajax-Aufruf fertig bearbeitet, Rueckgabedaten sind", data #DEBUG
 		return json.dumps(data)
 
 

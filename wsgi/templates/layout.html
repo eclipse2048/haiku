@@ -1,12 +1,13 @@
 $def with (content)
 
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC “-//W3C//DTD HTML 4.01//EN” “http://www.w3.org/TR/html4/strict.dtd”>
 
 <html>
 	<head>
 		<title>Automatoetry - Haikus mit Mensch und Maschine</title>
-		<link rel="stylesheet" type="text/css" href="/static/automatoetry.css" />
-		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script><!-- @TODO Weblink zu jQuery? -->
+		<link rel="stylesheet" type="text/css" href="/static/featherlight.css" />
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<!--		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script><!-- @TODO Weblink zu jQuery? -->
 		$if content.jsfiles:
 			$for f in content.jsfiles.split():
 				<script type="text/javascript" src="$f"></script>
@@ -14,19 +15,56 @@ $def with (content)
 	</head>
 
 	<body>
-		<h2>Automatoetry</h2>
-		<p><b>Haikus mit Mensch und Maschine</b></p>
-		<table class="topmenu">
-			<tr>
-				<td><a href="/">Neustart</a></td>
-				<td><a href="https://github.com/tradloff/haiku">Source Code</a></td>
-				<td><a href="http://tobias-radloff.de/blog/">Autor</a></td>
-			</tr>
-		</table>
+		<div id="wrap">
+			<div id="header">
+				<h1>
+					<span class="logo">&nbsp;</span>
+					Automatoetry
+				</h1>
+				<span id="description">Haikus mit Mensch und Maschine</span>
+			</div>
 
-		$:content
+			<div id="sidebar">
+				<table class="sidemenu">
+					<td>
+						<a href="/">Neu</a>
+					</td>
+					<td>
+						<a href="https://github.com/tradloff/haiku">Quellcode</a>
+					</td>
+					<td>
+						<a href="http://tobias-radloff.de/blog/">Autor</a>
+					</td>
+				</table>
+			</div> <!-- sidebar -->
 
-		<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
-		<p>Kontakt: mail [at] tobias-radloff [Punkt] de</p>
+
+
+			<div id="content">
+				<div id="pagecontent">
+
+
+					$:content
+
+				</div> <!-- pagecontent -->
+
+				<p class="clear">&nbsp;</p>
+
+				<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
+
+			</div> <!-- content -->
+
+			<div id="footer">
+				Copyright &copy; Project Haiku <br />
+				<a href="#">Your</a> | <a href="#">Links</a> | <a href="#">Here</a>
+<!-- @TODO -->
+			</div> <!-- footer -->
+
+		</div> <!-- wrap -->
+
+		<div id="credit">
+			CSS Template by <a href="http://ramblingsoul.com" title="Download High Quality CSS Templates">RamblingSoul.com</a>
+		</div> <!-- credit -->
+
 	</body>
 </html>

@@ -2,8 +2,15 @@ $def with (form)
 
 $var jsfiles: /static/start.js
 
+<h1>
+	Generation 0
+	<span class="seo">Gene der Startgeneration bestimmen</span>
+</h1>
+
 <form method="post" action="/" id="geneForm">
-	$:form.render()
+	<div class="startform">
+		$:form.render_css()
+	</div>
 </form>
 
 <div align="center" id="loading" style="display:none">
@@ -12,4 +19,4 @@ $var jsfiles: /static/start.js
 
 <div class="errorMsg"></div>
 
-<p>Zufallswort: <a href="http://www.wordreference.com">WordReference.com</a></p>
+<!--	<p>Zufallswort: <a href="http://www.wordreference.com">WordReference.com</a></p> -->

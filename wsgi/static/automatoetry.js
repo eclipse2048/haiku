@@ -10,7 +10,7 @@ jQuery(document).ready( function() {
 		jQuery("tr.latest")
 			// Kind-Haikus einfuegen
 			.html("\
-				<td class=\"genCount\">" + jsonData[2] + "</td>\
+				<th class=\"genCount\">" + jsonData[2] + "</td>\
 				<td align=\"center\" class=\"phenotype\" title=\"Seedwort: " + jsonData[0][0] + " \nGene: " + jsonData[0][1] + "\">" + jsonData[0][2].split("\n").join("<br />") + "</td>\
 				<td align=\"center\" class=\"phenotype\" title=\"Seedwort: " + jsonData[1][0] + " \nGene: " + jsonData[1][1] + "\">" + jsonData[1][2].split("\n").join("<br />") + "</td>")
 			// tr.latest zu tr.older machen
@@ -38,7 +38,7 @@ jQuery(document).ready( function() {
 
 		error: function(xhr, status, error) {
 			console.log("/do Initialer AJAX-Aufruf Teil 1 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>'); // @TODO: Reload-Link angeben
+			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
 		},
 
 		complete: function() {
@@ -63,7 +63,7 @@ jQuery(document).ready( function() {
 
 		error: function(xhr, status, error) {
 			console.log("/do Initialer AJAX-Aufruf Teil 2 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>'); // @TODO: Reload-Link angeben
+			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
 		},
 
 		complete: function() {
@@ -72,6 +72,7 @@ jQuery(document).ready( function() {
 		}
 	});
 
+	jQuery("a.errorReload").click(function() { location.reload(); });
 
 	// Definiere Event-Handler fuer die Kind-Buttons
 	jQuery("table").on("click", "tr.button-row input.button", function() {
@@ -104,7 +105,7 @@ jQuery(document).ready( function() {
 
 			error: function(xhr, status, error) {
 				console.log("/do AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-				jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder laden Sie neu.</p>');
+				jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder laden Sie <a href="" class="errorReload">neu</a>.</p>');
 
 				// verstecktes Kind wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");

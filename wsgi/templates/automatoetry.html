@@ -2,9 +2,18 @@ $def with (haiku)
 
 $var jsfiles: /static/automatoetry.js
 
+<h1>
+	Evolution der Poesie
+	<span class="seo">Generation für Generation ein neues Haiku</span>
+</h1>
+
 <table class="haiku">
+	<tr>
+		<th title="Generation">#</th>
+		<th colspan="3">Haiku</th>
+	</tr>
 	<tr class="parent">
-		<td class="genCount">$haiku.getGeneration()</td>
+		<th class="genCount">$haiku.getGeneration()</td>
 		<td colspan="2" class="phenotype" align="center" title="Seedwort: $haiku.getGenotype()[0] &#10;Gene: $haiku.getGenotype()[1]">(erzeuge Phänotyp...)</td>
 	</tr>
 	<tr class="empty"><br/></tr>

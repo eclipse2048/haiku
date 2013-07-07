@@ -1,0 +1,84 @@
+/*
+ * haiku.css
+ *
+ * Author: Tobias Radloff
+ *
+ */
+
+body {
+	background: #efefef;
+	padding: 0px;
+	margin: 0px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+#wrap {
+	width: 750px;
+	margin: 15px auto 5px auto;
+	background: #FFFFFF;
+	padding: 5px;
+}
+
+#header {
+	height: 75px;
+	background: #F3F4E8;
+}
+
+#content {
+	padding: 5px 0 5px 5px;
+	color: #666666
+}
+
+#sidebar {
+	width: 250px;
+	background: #F9F9F2;
+	float: right;
+	padding: 5px;
+}
+
+#pagecontent {
+	width: 470px;
+	padding: 3px;
+	float: left;
+}
+
+#footer {
+	height: 40px;
+	padding: 5px;
+	background: #F5F0E7;
+	color: #666666;
+}
+
+#header h1 {
+	display: block;
+	margin: 0;
+	padding: 10px 0px 0px 15px;
+	font-weight: normal;
+	font-size: 22px;
+	color: #999933;
+	background-color: #F9F9F2;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	text-transform: uppercase;
+}
+
+#wrap #header .logo {
+	display: block;
+	float: left;
+	width: 10px;
+	height: 10px;
+	margin-right: 5px;
+	font-size: 1px;
+	border: 7px solid #999933;
+	background-color: #FFFFFF;
+}
+
+a {	color: #CEA682; }
+
+a:visited, active { color: #CEA682; }
+
+a:hover {
+	color: #999999;
+	text-decoration: none;
+}
+
