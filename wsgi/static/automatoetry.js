@@ -38,7 +38,7 @@ jQuery(document).ready( function() {
 
 		error: function(xhr, status, error) {
 			console.log("/do Initialer AJAX-Aufruf Teil 1 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
+			jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
 		},
 
 		complete: function() {
@@ -63,7 +63,7 @@ jQuery(document).ready( function() {
 
 		error: function(xhr, status, error) {
 			console.log("/do Initialer AJAX-Aufruf Teil 2 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
+			jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">noch einmal</a>.</p>');
 		},
 
 		complete: function() {
@@ -72,10 +72,27 @@ jQuery(document).ready( function() {
 		}
 	});
 
-	jQuery("a.errorReload").click(function() { location.reload(); });
+	var errorType, errorTarget;
+//	console.log("errorType und -Target sind " + errorType + ", " + errorTarget);
+
+	jQuery("div.errorMsg").on("click", "a.errorReload", function() { location.reload(); });
+
+	jQuery("div.errorMsg").on("click", "a.errorRetrigger", function() {
+		if (errorType && errorTarget) {
+			jQuery(errorTarget).trigger(errorType);
+			return false;
+		} else {
+			location.reload();
+		}
+	});
 
 	// Definiere Event-Handler fuer die Kind-Buttons
-	jQuery("table").on("click", "tr.button-row input.button", function() {
+	jQuery("table").on("click", "tr.button-row input.button", function(event) {
+		console.log("/do: Event-Typ ist " + event.type + " und Event-Ziel ist " + event.target.nodeName);
+
+		errorType = event.type;
+		errorTarget = event.target;
+
 		// evtl. Fehlermeldung loeschen
 		jQuery("div.errorMsg").html("");
 
@@ -105,7 +122,7 @@ jQuery(document).ready( function() {
 
 			error: function(xhr, status, error) {
 				console.log("/do AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-				jQuery("div.errorMsg").html('<p class="errorMsg">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder laden Sie <a href="" class="errorReload">neu</a>.</p>');
+				jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder versuchen Sie es <a href="" class="errorRetrigger">erneut</a>.</p>');
 
 				// verstecktes Kind wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");

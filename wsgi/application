@@ -62,6 +62,7 @@ else:
 	sessionsDir = tempfile.gettempdir() + "/sessions/"
 session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 
+print "application: devFunction ist", Haiku.devFunction
 
 class start:
 	u"""Definiert Formular und GET- und POST-Methoden fuer die
@@ -90,6 +91,10 @@ class start:
 			description = "Gene:"
 		),
 		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
+		web.form.Dropdown(
+			"Algorithmus",
+			[(f, f + " (" + Haiku.devFuncDescriptions[f] + ") ") for f in Haiku().getDevFunctions()]# if not Haiku.devFuncDescriptions[f].startswith("Debug")]
+		),
 		web.form.Button("Los", class_ = "button")
 	)
 
@@ -127,6 +132,8 @@ class start:
 			if not f.validates():
 				return render.start(f)
 			session.haiku = Haiku(f.d.seedword, f.d.genes)
+			Haiku.devFunction = input.Algorithmus
+			print "/ POST: Algorithmus ist", Haiku.devFunction #DEBUG
 			raise web.seeother("do")
 
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
@@ -159,8 +166,8 @@ class automatoetry:
 			Generation und gibt zwei neue Kinder zurueck.
 		"""
 		if not "haiku" in session:
-			print "/do POST: Session enthaelt kein Haiku. Session ist", session #DEBUG
-#			raise web.seeother("/")
+#			print "/do POST: Session enthaelt kein Haiku. Session ist", session #DEBUG
+			raise web.seeother("/")
 		input = web.input()
 		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 

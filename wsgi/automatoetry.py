@@ -67,7 +67,7 @@ SYL_DIGITS_REGEXP = re.compile(r"\d+")
 SYL_QU_REGEXP = re.compile(ur"qu[aeiouäöüy]")
 SYL_Y_REGEXP = re.compile(ur"y[aeiouäöü]")
 
-DEFAULT_SEEDWORD = u"werden"
+DEFAULT_SEEDWORD = u"Poesie"
 u"""Default-Seedwort, falls kein zufaelliges Wort ermittelt werden kann.
 """
 
@@ -85,7 +85,7 @@ else:
 f = open(filename, "r")
 STOPWORDS_DE = [sw.strip().decode("utf-8") for sw in f.readlines()]
 f.close()
-## Alternative Methode zum Stoppwoertereinlesen (muss aber per nltk.ddownload() einmalig initiiert werden):
+## Alternative Methode zum Stoppwoertereinlesen (muss aber per nltk.download() einmalig initiiert werden):
 #from nltk.corpus import stopwords
 #STOPWORDS_DE = [sw.decode("utf-8") for sw in stopwords.words("german")]
 
@@ -102,6 +102,9 @@ class Haiku:
 		sieben mit Zeile 2.
 	"""
 
+	devFunction = "LRColloc"
+	devFuncDescriptions = {"LRColloc": "empfohlen", "Loremipsum": "Debug", "TextRank": "experimentell"}
+
 	def __init__(self, seedword=None, genes=None, generation=0):
 		u"""@TODO: Beschreibung fehlt
 		"""
@@ -117,8 +120,6 @@ class Haiku:
 		else:
 			self.__genes = self.getRandomGenes()
 		self.__generation, self.__children, self.__randGen = generation, [], random.Random()
-#		self.__defaultDevFunc = "Loremipsum" #DEBUG
-		self.__defaultDevFunc = "LRColloc"
 		self.__phenotype = ""
 
 
@@ -172,6 +173,14 @@ class Haiku:
 		return [self.__seedword, self.__genes]
 
 
+	def getDevFunctions(self):
+		"""@TODO: Beschreibung fehlt
+		"""
+		classPrefix = "_" + self.__class__.__name__ + "__develop"
+		l = len(classPrefix)
+		return [f[l:] for f in dir(self) if f.startswith(classPrefix) and len(f) > l]
+
+
 	def getPhenotype(self):
 		u"""@TODO: Beschreibung fehlt. Darin muss erwaehnt werden, dass
 			diese Funktion Fehler weitergeben kann, die abgefangen
@@ -182,8 +191,8 @@ class Haiku:
 			return self.__phenotype
 
 		# Gut, dann eben jetzt
-		print "Rufe Develop-Funktion '" + self.getDefaultDevFunc() + "' fuer Genotyp", self.getGenotype(), "mit Credentials", WORTSCHATZ_CREDENTIALS, "auf." #DEBUG
-		function = "_" + self.__class__.__name__ + "__develop" + self.getDefaultDevFunc()
+		print "Rufe Develop-Funktion '" + Haiku.devFunction + "' fuer Genotyp", self.getGenotype(), "mit Credentials", WORTSCHATZ_CREDENTIALS, "auf." #DEBUG
+		function = "_" + self.__class__.__name__ + "__develop" + Haiku.devFunction
 		phenotype = getattr(self, function).__call__() # Hier fange ich absichtlich keine Exceptions ab
 		try:
 			phenotype = phenotype.decode("utf-8")
@@ -203,15 +212,6 @@ class Haiku:
 		u"""@TODO: Beschreibung fehlt
 		"""
 		return self.__children
-
-
-	def setDefaultDevFunc(self, function):
-		if function in self.getDevFunctions():
-			self.__defaultDevFunc = function
-
-
-	def getDefaultDevFunc(self):
-		return self.__defaultDevFunc
 
 
 	def countSyllables(self, word):
@@ -297,14 +297,6 @@ class Haiku:
 		return string.ascii_lowercase.find(c.lower()) + 1
 
 
-	def getDevFunctions(self):
-		"""@TODO: Beschreibung fehlt
-		"""
-		classPrefix = "_" + self.__class__.__name__ + "__develop"
-		l = len(classPrefix)
-		return [f[l:] for f in dir(self) if f.startswith(classPrefix) and len(f) > l]
-
-
 	def __developLoremipsum(self):
 		u"""Gibt ein hartcodiertes Haiku zurueck. Gut fuers Debugging
 			und wenn der Wortschatz-Server nicht erreichbar ist.
@@ -312,118 +304,118 @@ class Haiku:
 		return "Lorem Ipsum bla\nZeile braucht sieben Silben\nHassenichgesehn"
 
 
-	def __developLR575Syllables(self):
-		u"""__developLR575Syllables() erzeugt ein Haiku aus 5-7-5
-			Silben. Wie bei __developLR575Words() wird in jeder Zeile
-			das Seedwort ermittelt und an die entsprechende Stelle
-			gesetzt. Danach wird die Zeile nach links und rechts mit
-			Left/RightNeighbours aufgefuellt, bis die gewuenschte
-			Silbenanzahl erreicht ist. Falls nur noch eine Silbe frei
-			ist und die Neighbours-Liste kein einsilbiges Wort enthaelt,
-			nehme ich "und".
-
-			Die Ergebnisse sind nicht voellig schlecht, aber:
-			- Kinder haben zu wenig Varianz, vor allem bei
-			ungewoehnlichen Seedworten mit wenigen Synonymen.
-			- Oft ist der Phaenotyp einer oder beider Kinder identisch
-			mit dem des Elter.
-			- Nicht jede Mutation sorgt fuer eine sichtbare
-			Veraenderung, und wenn es zu Veraenderungen kommt, betreffen
-			sie oft die ganze Zeile.
-
-			Schoener waere eine direkte Zuordnung Gen->Silbe, weil dann
-			jede Mutation eine konkrete Phaenotypenveraenderung
-			hervorrufen wuerde.
-		"""
-		geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
-
-		# Position des Seedworts in der jeweiligen Zeile ermitteln. Zurzeit nehme ich die Position des Gens mit dem niedrigsten Wert
-		for i in range(3):
-			seedwordPos.append(geneLines[i].index(min(geneLines[i])))
-
-		# Wortgrundform von Seedwort suchen
-		baseseed = libleipzig.Baseform(self.getGenotype()[0], auth=WORTSCHATZ_CREDENTIALS)
-		if len(baseseed) > 0:
-			seedword1 = baseseed[0][0]
-		else:
-			seedword1 = self.getGenotype()[0]
-
-		# nacheinander die drei Zeilen des Haikus erzeugen
-		for i in range(3):
-
-			# Seedwort ermitteln
-			seedword = seedword1
-			if i != 0:
-				if i == 1:
-					lineSeed, line1Seed = seedword1, ""
-				elif i == 2:
-					lineSeed = line1Seed
-				g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # das nicht benutzte Gen aus der vorigen Zeile hilft, das Seedwort dieser Zeile zu erzeugen
-
-				# Wortgrundform suchen
-				baseform = libleipzig.Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)
-				if len(baseform) > 0:
-					lineSeed = baseform[0][0]
-
-				# Thesaurus
-				words = libleipzig.Similarity(lineSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
-
-				# Seedwort aus Rueckgabeliste auswaehlen
-				while len(words) > 0:
-					j = g % len(words) - 1
-					seedword = words.pop(j)[1] # words[j] ist Liste mit dem Synonymwort an Pos. 0 (Similarity: Pos. 1)
-					if self.countSyllables(seedword) > 0:
-						line1Seed = seedword
-						break
-
-			# Zahl der freien Silben rechts und links errechnen
-			# @TODO: Was tun, wenn Seedwort zu lang fuer die Zeile?
-			line, s, syllableNo = seedword, self.countSyllables(seedword), len(geneLines[i])
-			if s + seedwordPos[i] > syllableNo:
-				freeSyllablesRight = 0
-				seedwordPos[i] = syllableNo - s
-			else:
-				freeSyllablesRight = syllableNo - s - seedwordPos[i]
-			freeSyllablesLeft = seedwordPos[i]
-
-			# Zeile nach links vervollstaendigen
-			while freeSyllablesLeft > 0:
-				word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
-				g = self.__char2int(geneLines[i][freeSyllablesLeft-1])
-				words = libleipzig.LeftNeighbours(line.split()[0], g, auth=WORTSCHATZ_CREDENTIALS)
-				while len(words) > 0:
-					j = g % len(words) - 1
-					tmpWord = words.pop(j)[0] # words[j] ist Liste mit dem Nachbarwort an Pos. 0
-					lTmp = self.countSyllables(tmpWord)
-					if lTmp > freeSyllablesLeft or lTmp == 0:
-						continue
-					else:
-						word = tmpWord
-						break
-				freeSyllablesLeft -= self.countSyllables(word)
-				line = word + " " + line
-
-			# Zeile nach rechts vervollstaendigen
-			while freeSyllablesRight > 0:
-				word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
-				g = self.__char2int(geneLines[i][syllableNo-freeSyllablesRight])
-				words = libleipzig.RightNeighbours(line.split()[-1], g, auth=WORTSCHATZ_CREDENTIALS)
-				while len(words) > 0:
-					j = g % len(words) - 1
-					tmpWord = words.pop(j)[1] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 1
-					lTmp = self.countSyllables(tmpWord)
-					if lTmp > freeSyllablesRight or lTmp == 0:
-						continue
-					else:
-						word = tmpWord
-						break
-				line = line + " " + word
-				freeSyllablesRight -= self.countSyllables(word)
-
-			phenotype.append(line)
-
-		self.__phenotype = "\n".join(phenotype)
-		return self.__phenotype
+	#~ def __developLR575Syllables(self):
+		#~ u"""__developLR575Syllables() erzeugt ein Haiku aus 5-7-5
+			#~ Silben. Wie bei __developLR575Words() wird in jeder Zeile
+			#~ das Seedwort ermittelt und an die entsprechende Stelle
+			#~ gesetzt. Danach wird die Zeile nach links und rechts mit
+			#~ Left/RightNeighbours aufgefuellt, bis die gewuenschte
+			#~ Silbenanzahl erreicht ist. Falls nur noch eine Silbe frei
+			#~ ist und die Neighbours-Liste kein einsilbiges Wort enthaelt,
+			#~ nehme ich "und".
+#~
+			#~ Die Ergebnisse sind nicht voellig schlecht, aber:
+			#~ - Kinder haben zu wenig Varianz, vor allem bei
+			#~ ungewoehnlichen Seedworten mit wenigen Synonymen.
+			#~ - Oft ist der Phaenotyp einer oder beider Kinder identisch
+			#~ mit dem des Elter.
+			#~ - Nicht jede Mutation sorgt fuer eine sichtbare
+			#~ Veraenderung, und wenn es zu Veraenderungen kommt, betreffen
+			#~ sie oft die ganze Zeile.
+#~
+			#~ Schoener waere eine direkte Zuordnung Gen->Silbe, weil dann
+			#~ jede Mutation eine konkrete Phaenotypenveraenderung
+			#~ hervorrufen wuerde.
+		#~ """
+		#~ geneLines, phenotype, seedwordPos = self.getGenotype()[1].split(), [], []
+#~
+		#~ # Position des Seedworts in der jeweiligen Zeile ermitteln. Zurzeit nehme ich die Position des Gens mit dem niedrigsten Wert
+		#~ for i in range(3):
+			#~ seedwordPos.append(geneLines[i].index(min(geneLines[i])))
+#~
+		#~ # Wortgrundform von Seedwort suchen
+		#~ baseseed = libleipzig.Baseform(self.getGenotype()[0], auth=WORTSCHATZ_CREDENTIALS)
+		#~ if len(baseseed) > 0:
+			#~ seedword1 = baseseed[0][0]
+		#~ else:
+			#~ seedword1 = self.getGenotype()[0]
+#~
+		#~ # nacheinander die drei Zeilen des Haikus erzeugen
+		#~ for i in range(3):
+#~
+			#~ # Seedwort ermitteln
+			#~ seedword = seedword1
+			#~ if i != 0:
+				#~ if i == 1:
+					#~ lineSeed, line1Seed = seedword1, ""
+				#~ elif i == 2:
+					#~ lineSeed = line1Seed
+				#~ g = self.__char2int(geneLines[i-1][seedwordPos[i-1]]) # das nicht benutzte Gen aus der vorigen Zeile hilft, das Seedwort dieser Zeile zu erzeugen
+#~
+				#~ # Wortgrundform suchen
+				#~ baseform = libleipzig.Baseform(lineSeed, auth=WORTSCHATZ_CREDENTIALS)
+				#~ if len(baseform) > 0:
+					#~ lineSeed = baseform[0][0]
+#~
+				#~ # Thesaurus
+				#~ words = libleipzig.Similarity(lineSeed, g, auth=WORTSCHATZ_CREDENTIALS) # hole g Worte via Thesaurus
+#~
+				#~ # Seedwort aus Rueckgabeliste auswaehlen
+				#~ while len(words) > 0:
+					#~ j = g % len(words) - 1
+					#~ seedword = words.pop(j)[1] # words[j] ist Liste mit dem Synonymwort an Pos. 0 (Similarity: Pos. 1)
+					#~ if self.countSyllables(seedword) > 0:
+						#~ line1Seed = seedword
+						#~ break
+#~
+			#~ # Zahl der freien Silben rechts und links errechnen
+			#~ # @TODO: Was tun, wenn Seedwort zu lang fuer die Zeile?
+			#~ line, s, syllableNo = seedword, self.countSyllables(seedword), len(geneLines[i])
+			#~ if s + seedwordPos[i] > syllableNo:
+				#~ freeSyllablesRight = 0
+				#~ seedwordPos[i] = syllableNo - s
+			#~ else:
+				#~ freeSyllablesRight = syllableNo - s - seedwordPos[i]
+			#~ freeSyllablesLeft = seedwordPos[i]
+#~
+			#~ # Zeile nach links vervollstaendigen
+			#~ while freeSyllablesLeft > 0:
+				#~ word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
+				#~ g = self.__char2int(geneLines[i][freeSyllablesLeft-1])
+				#~ words = libleipzig.LeftNeighbours(line.split()[0], g, auth=WORTSCHATZ_CREDENTIALS)
+				#~ while len(words) > 0:
+					#~ j = g % len(words) - 1
+					#~ tmpWord = words.pop(j)[0] # words[j] ist Liste mit dem Nachbarwort an Pos. 0
+					#~ lTmp = self.countSyllables(tmpWord)
+					#~ if lTmp > freeSyllablesLeft or lTmp == 0:
+						#~ continue
+					#~ else:
+						#~ word = tmpWord
+						#~ break
+				#~ freeSyllablesLeft -= self.countSyllables(word)
+				#~ line = word + " " + line
+#~
+			#~ # Zeile nach rechts vervollstaendigen
+			#~ while freeSyllablesRight > 0:
+				#~ word = "und" # @TODO: zufaelliges Ein-Silben-Fuellwort aussuchen
+				#~ g = self.__char2int(geneLines[i][syllableNo-freeSyllablesRight])
+				#~ words = libleipzig.RightNeighbours(line.split()[-1], g, auth=WORTSCHATZ_CREDENTIALS)
+				#~ while len(words) > 0:
+					#~ j = g % len(words) - 1
+					#~ tmpWord = words.pop(j)[1] # words[j] ist eine Liste mit dem Nachbarwort an Pos. 1
+					#~ lTmp = self.countSyllables(tmpWord)
+					#~ if lTmp > freeSyllablesRight or lTmp == 0:
+						#~ continue
+					#~ else:
+						#~ word = tmpWord
+						#~ break
+				#~ line = line + " " + word
+				#~ freeSyllablesRight -= self.countSyllables(word)
+#~
+			#~ phenotype.append(line)
+#~
+		#~ self.__phenotype = "\n".join(phenotype)
+		#~ return self.__phenotype
 
 
 	def __developLRColloc(self):
@@ -627,7 +619,7 @@ def chooseNewGeneration(autoPoem, children):
 def main():
 	myPoem = Haiku()
 	print "Genotyp: ", myPoem.getGenotype()
-	myPoem.setDefaultDevFunc("LRColloc")
+	setDefaultDevFunc("LRColloc")
 	print u"\nPhaenotyp LRColloc:\n\n", myPoem.getPhenotype()
 
 #	while True: # dieser Block fkt. so nicht mehr
