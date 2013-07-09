@@ -24,7 +24,7 @@
 from __future__ import division, absolute_import
 import os
 
-if "OPENSHIFT_PYTHON_DIR" in os.environ:
+if "OPENSHIFT_PYTHON_DIR" in os.environ: # alternativ: import platform; if platform.node == [OPENSHIFT-whatever]: ...
 	RUNS_ON_OPENSHIFT = True
 else:
 	RUNS_ON_OPENSHIFT = False
@@ -76,8 +76,10 @@ session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 
 # erzeuge Datenbank-Objekt
 if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD" in os.environ:
+	print "application: $OPENSHIFT_MYSQL_DB_URL ist", os.environ["OPENSHIFT_MYSQL_DB_URL"] #DEBUG
 	db = web.database(
-		dburl = os.environ["OPENSHIFT_MYSQL_DB_URL"],
+		host = os.environ["OPENSHIFT_MYSQL_DB_HOST"],
+		port = os.environ["OPENSHIFT_MYSQL_DB_PORT"],
 		dbn = 'mysql',
 		db = 'haiku',
 		user = os.environ["OPENSHIFT_MYSQL_DB_USERNAME"],
