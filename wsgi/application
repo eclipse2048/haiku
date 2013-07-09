@@ -79,7 +79,7 @@ if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD"
 	print "application: $OPENSHIFT_MYSQL_DB_URL ist", os.environ["OPENSHIFT_MYSQL_DB_URL"] #DEBUG
 	db = web.database(
 		host = os.environ["OPENSHIFT_MYSQL_DB_HOST"],
-		port = os.environ["OPENSHIFT_MYSQL_DB_PORT"],
+		port = int(os.environ["OPENSHIFT_MYSQL_DB_PORT"]),
 		dbn = 'mysql',
 		db = 'haiku',
 		user = os.environ["OPENSHIFT_MYSQL_DB_USERNAME"],
