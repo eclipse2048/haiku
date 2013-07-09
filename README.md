@@ -1,12 +1,14 @@
 Automatoetry - Haikus mit Mensch und Maschine
 =============================================
 
-Dieses Programm ist Open Source und steht unter der Gnu Public License (GPL). Der Code ist frei kopierbar, darf nicht kommerziell verwendet werden, yadda yadda yadda.
+Dieses Programm ist Open Source und steht unter der Gnu Public License (GPL). Der Code ist frei kopierbar und darf nicht kommerziell verwendet werden, yadda yadda yadda.
 
 Die Idee
 --------
 
-Automatoetry ist der Versuch, mit einer Verbindung von computerisiertem Ausprobieren und dem menschlichen Sinn für Schönheit Poesie zu erschaffen. Das Medium der Wahl sind Haikus, eine japanische Gedichtform, die aus drei Zeilen mit 5, 7 und 5 Silben besteht.
+Automatoetry ist der Versuch, mit einer Verbindung von computerisiertem Ausprobieren und dem menschlichen Sinn für Schönheit Poesie zu erschaffen. Ob es klappt? Ich habe keine Ahnung.
+
+Das Medium der Wahl sind Haikus, eine japanische Gedichtform, die aus drei Zeilen mit 5, 7 und 5 Silben besteht.
 
 Wie geht's?
 -----------
@@ -20,7 +22,7 @@ Idealerweise kommt nach vielen Generationen ein "schönes", also mehr oder wenig
 Wo kann ich es ausprobieren?
 ----------------------------
 
-Eine aktuelle Version des Programms lässt sich hier auprobieren: http://haiku-tradloff.rhcloud.com (gehostet von Openshift)
+Eine aktuelle Version des Programms lässt sich hier auprobieren: http://haiku.tobias-radloff.de (gehostet von Openshift)
 
 Technische Details
 ------------------
@@ -30,6 +32,7 @@ Technische Details
 * Python 2.6
 * web.py 0.34
 * libleipzig 1.3
+* MySQL-python 1.2.3
 
 **Weitere Quellen**
 

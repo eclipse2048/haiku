@@ -75,10 +75,25 @@ else:
 session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 
 # erzeuge Datenbank-Objekt
-db_user, db_pw = "anonymous", "anonymous"
-if "HAIKU_MYSQL_USER" in os.environ and "HAIKU_MYSQL_PASSWORD" in os.environ:
-	db_user, db_pw = os.environ["HAIKU_MYSQL_USER"], os.environ["HAIKU_MYSQL_PASSWORD"]
-db = web.database(dbn='mysql', db='haiku', user=db_user, pw=db_pw)
+if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD" in os.environ:
+	db = web.database(
+		dburl = os.environ["OPENSHIFT_MYSQL_DB_URL"],
+		dbn = 'mysql',
+		db = 'haiku',
+		user = os.environ["OPENSHIFT_MYSQL_DB_USERNAME"],
+		pw = os.environ["OPENSHIFT_MYSQL_DB_PASSWORD"]
+	)
+elif "HAIKU_MYSQL_USER" in os.environ and "HAIKU_MYSQL_PASSWORD" in os.environ:
+	db = web.database(
+		dbn = 'mysql',
+		db = 'haiku',
+		user = os.environ["HAIKU_MYSQL_USER"],
+		pw = os.environ["HAIKU_MYSQL_PASSWORD"]
+	)
+else:
+	db = web.database(dbn='mysql', db='haiku', user="haiku", pw="automatoetry") #DEBUG
+#	db = None # @TODO: Fehlerbehandlung?
+print "application: db ist", db #DEBUG
 
 
 # Datenbankfunktionen

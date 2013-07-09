@@ -10,6 +10,6 @@ setup(
 	install_requires = [
 		'web.py',
 		'libleipzig',
-		'MySQL-python', # 'python-mysqldb'?
+		'MySQL-python'
 	],
 )
