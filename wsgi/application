@@ -43,14 +43,26 @@ if RUNS_ON_OPENSHIFT:
 import web
 import json
 import tempfile
+import datetime
 from automatoetry import Haiku, GENES_REGEXP
 
 # Initialisierungsvariablen fuer web.py
-urls = ("/", "start", "/do", "automatoetry")
-render = web.template.render(os.path.abspath(os.path.dirname(__file__)) + "/templates/", base="layout")
 web.config.debug = False
-app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
+urls = (
+	"/", "GenerationZero",
+	"/gallery", "Gallery",
+	"/haiku", "Automatoetry",
+	"/share", "Share",
+	"/add", "AddHaiku",
+)
+render = web.template.render(
+	os.path.abspath(os.path.dirname(__file__)) + "/templates/",
+	base = "layout",
+	globals = {"round": round}
+)
 
+# application starten
+app = web.application(urls, globals()) # erzeugt ImportError, falls kein Symlink application.py -> application existiert
 if RUNS_ON_OPENSHIFT:
 	application = app.wsgifunc()
 
@@ -62,15 +74,106 @@ else:
 	sessionsDir = tempfile.gettempdir() + "/sessions/"
 session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 
-print "application: devFunction ist", Haiku.devFunction
+# erzeuge Datenbank-Objekt
+db_user, db_pw = "anonymous", "anonymous"
+if "HAIKU_MYSQL_USER" in os.environ and "HAIKU_MYSQL_PASSWORD" in os.environ:
+	db_user, db_pw = os.environ["HAIKU_MYSQL_USER"], os.environ["HAIKU_MYSQL_PASSWORD"]
+db = web.database(dbn='mysql', db='haiku', user=db_user, pw=db_pw)
 
-class start:
+
+# Datenbankfunktionen
+def getHaikus(page=1):
+	u"""@TODO: Beschreibung fehlt
+	"""
+	limit = 10
+	offset = (page - 1) * limit
+	countResult = db.query("SELECT count(*) from haiku")
+	count = int(countResult[0].values()[0])
+	if offset > count - limit:
+		offset = None
+	return (db.select('haiku', order="id DESC", limit=limit, offset=offset), count)
+
+def addHaiku(inputData):
+	u"""@TODO: Beschreibung fehlt
+	"""
+	db.insert(
+		'haiku',
+		content = inputData.content,
+		seedword = inputData.seedword,
+		genes = inputData.genes,
+		generation = inputData.generation,
+		author = inputData.author,
+		comment = inputData.comment,
+		algorithm = Haiku.devFunction,
+		posted_on = datetime.datetime.now()
+	)
+
+def delHaiku(id): # @TODO
+	pass
+
+
+class Share:
+	shareForm = web.form.Form(
+		web.form.Textarea("content", description = "Dein Haiku:", readonly="readonly", class_ = "textfield", rows = 3, cols = 40),
+		web.form.Textbox("author", description = "Dein Name (optional):", class_ = "textfield", size = 40),
+		web.form.Textarea("comment", description = "Kommentar (optional):", class_ = "textfield", rows = 5, cols = 40),
+		web.form.Hidden("seedword"),
+		web.form.Hidden("genes"),
+		web.form.Hidden("generation"),
+		web.form.Hidden("algorithm"),
+		web.form.Button("Fertig", class_ = "button")
+	)
+
+	def GET(self):
+		raise web.seeother("/gallery")
+
+	def POST(self):
+		input = web.input()
+		print "/share: input ist", input #DEBUG
+		sf = self.shareForm()
+		sf.content.set_value(input.content.replace("<br>", "\n")) # @TODO: Herausfinden, wann "<br />" durch "<br>" ersetzt wird
+		sf.seedword.set_value(input.seedword)
+		sf.genes.set_value(input.genes)
+		sf.generation.set_value(input.generation)
+		sf.algorithm.set_value(Haiku.devFunction)
+		return render.share(sf)
+
+
+class AddHaiku:
+	def GET(self):
+		raise web.seeother("/gallery")
+
+	def POST(self):
+		input = web.input()
+		print "AddHaiku POST(): input ist", input #DEBUG
+		if input.author == "":
+			input.author = "anonym"
+		addHaiku(input)
+		raise web.seeother("/gallery?note=HaikuAdded")
+
+
+class Gallery:
+	def GET(self):
+		input = web.input()
+		note=input.get("note", "")
+		page = input.get("page", 1)
+		try:
+			page = int(page)
+		except:
+			page = 1
+		haikus, count = getHaikus(page=page)
+		return render.gallery(haikus, count, page, note)
+
+	def POST(self):
+		self.GET()
+
+
+class GenerationZero:
 	u"""Definiert Formular und GET- und POST-Methoden fuer die
 		Startwebseite des Projekts, auf der der User den Genotyp fuer
 		Generation 1 bestimmt. Das zugehoerige Template ist
-		"templates/start.html".
+		"templates/genzero.html".
 	"""
-
 	form = web.form.Form(
 		web.form.Textbox(
 			"seedword",
@@ -93,11 +196,10 @@ class start:
 		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
 		web.form.Dropdown(
 			"Algorithmus",
-			[(f, f + " (" + Haiku.devFuncDescriptions[f] + ") ") for f in Haiku().getDevFunctions()]# if not Haiku.devFuncDescriptions[f].startswith("Debug")]
+			[(f, f + " (" + Haiku.devFuncDescriptions[f] + ") ") for f in Haiku().getDevFunctions() if not Haiku.devFuncDescriptions[f].startswith("Debug")]
 		),
 		web.form.Button("Los", class_ = "button")
 	)
-
 
 	def GET(self):
 		u"""Gibt das Formular fuer Gene und Seedwort zurueck, befuellt
@@ -114,14 +216,13 @@ class start:
 		f["genes"].set_value(tmpHaiku.getGenotype()[1])
 		return render.start(f)
 
-
 	def POST(self):
 		u"""Wird von den Buttons auf "templates/start.html" aufgerufen.
 			Je nach Aufrufer wird unterschiedlich verfahren:
 			- Neues Seedwort / Neue Gene: Funktion gibt neue
 			Zufallswerte zurueck
-			- Los-Button (Submit): Funktion erzeugt haiku mit den
-			Werten aus dem Formular neu und ruft Seite "do" auf.
+			- Los-Button (Submit): Funktion erzeugt Haiku mit den
+			Werten aus dem Formular neu und ruft Seite "/haiku" auf.
 		"""
 		input = web.input()
 		print "/ POST: Input ist", input #DEBUG
@@ -133,8 +234,7 @@ class start:
 				return render.start(f)
 			session.haiku = Haiku(f.d.seedword, f.d.genes)
 			Haiku.devFunction = input.Algorithmus
-			print "/ POST: Algorithmus ist", Haiku.devFunction #DEBUG
-			raise web.seeother("do")
+			raise web.seeother("/haiku")
 
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
 		tmpPoem = Haiku()
@@ -144,7 +244,7 @@ class start:
 			return tmpPoem.getRandomGenes()
 
 
-class automatoetry:
+class Automatoetry:
 	u"""Definiert GET- und POST-Methoden fuer die Hauptwebseite des
 		Projekts, auf der der User zwischen den Kindern einer Generation
 		entscheidet, welches sich weiter fortpflanzt. Das zugehoerige
@@ -155,21 +255,18 @@ class automatoetry:
 		u"""Gibt Seedwort, Gene und Phaenotyp fuer Generation 1 zurueck
 			(den Phaenotyp als Liste von Zeilen).
 		"""
-		print "/do GET: Session-ID ist", session.session_id, "im Verzeichnis", session.store._get_path(session.session_id), "und das Session-Haiku ist", "haiku" in session #DEBUG
 		if not "haiku" in session:
 			raise web.seeother("/")
 		return render.automatoetry(session.haiku)
-
 
 	def POST(self):
 		u"""Erledigt POST-Requests. Sorgt fuer den Wechsel zur neuen
 			Generation und gibt zwei neue Kinder zurueck.
 		"""
 		if not "haiku" in session:
-#			print "/do POST: Session enthaelt kein Haiku. Session ist", session #DEBUG
 			raise web.seeother("/")
 		input = web.input()
-		print "/do POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
+		print "/haiku POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
 		if input.query == "0": # initialer Ajax-Aufruf Teil 1
 			return json.dumps(session.haiku.getPhenotype())
@@ -179,7 +276,7 @@ class automatoetry:
 			parent = session.haiku.getChildren()[0]
 		elif input.query == "r": # Rechtes Kind
 			parent = session.haiku.getChildren()[1]
-		print "/do POST: Neuer Elter ist", parent #DEBUG
+		print "/haiku POST: Neuer Elter ist", parent #DEBUG
 
 		# neue Kinder erzeugen
 		children = parent.procreateN(2)
@@ -188,6 +285,7 @@ class automatoetry:
 		if parent != session.haiku:
 			session.haiku = parent
 
+		# Kinder-Daten zurueckgeben
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
 		return json.dumps(data)

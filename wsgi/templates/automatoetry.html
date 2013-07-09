@@ -12,17 +12,20 @@ $var jsfiles: /static/automatoetry.js
 		<th title="Generation">#</th>
 		<th colspan="3">Haiku</th>
 	</tr>
-	<tr class="parent">
-		<th class="genCount">$haiku.getGeneration()</td>
-		<td colspan="2" class="phenotype" align="center" title="Seedwort: $haiku.getGenotype()[0] &#10;Gene: $haiku.getGenotype()[1]">(erzeuge Phänotyp...)</td>
+	<tr class="genZero">
+		<th class="genCount">$haiku.getGeneration()</th>
+		<td colspan="2" class="phenotype" align="center" title="Startwort: $haiku.getGenotype()[0] &#10;Gene: $haiku.getGenotype()[1]">(erzeuge Phänotyp...)</td>
+		<td class="share" />
 	</tr>
 	<tr class="empty"><br/></tr>
 	<tr class="latest">
-		<td colspan="3" align="center">
+		<td />
+		<td colspan="2" align="center">
 			<div align="center" id="loading" style="display:none">
 				<img src="/static/ajax-loader.gif" />
 			</div>
 		</td>
+		<td />
 	</tr>
 </table>
 

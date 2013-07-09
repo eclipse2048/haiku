@@ -7,7 +7,6 @@ $def with (content)
 		<title>Automatoetry - Haikus mit Mensch und Maschine</title>
 		<link rel="stylesheet" type="text/css" href="/static/featherlight.css" />
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<!--		<script type="text/javascript" src="/static/jquery-1.10.1.min.js"></script><!-- @TODO Weblink zu jQuery? -->
 		$if content.jsfiles:
 			$for f in content.jsfiles.split():
 				<script type="text/javascript" src="$f"></script>
@@ -30,41 +29,34 @@ $def with (content)
 						<a href="/">Neu</a>
 					</td>
 					<td>
-						<a href="https://github.com/tradloff/haiku">Quellcode</a>
+						<a href="/gallery">Galerie</a>
 					</td>
 					<td>
-						<a href="http://tobias-radloff.de/blog/">Autor</a>
+						<a href="https://github.com/tradloff/haiku">Quellcode (Github)</a>
+					</td>
+					<td>
+
 					</td>
 				</table>
 			</div> <!-- sidebar -->
 
-
-
 			<div id="content">
 				<div id="pagecontent">
-
-
 					$:content
-
 				</div> <!-- pagecontent -->
 
 				<p class="clear">&nbsp;</p>
-
 				<p>Unter Verwendung der API von <a href="http://wortschatz.uni-leipzig.de/">Wortschatz Universität Leipzig</a></p>
-
 			</div> <!-- content -->
 
 			<div id="footer">
-				Copyright &copy; Project Haiku <br />
-				<a href="#">Your</a> | <a href="#">Links</a> | <a href="#">Here</a>
-<!-- @TODO -->
+				Idee und Verwirklichung: Tobias Radloff | mail (at) tobias-radloff (dot) de <br />
+				Mehr vom Autor: <a href="https://twitter.com/search?q=%23corpsq	">Corporation Square</a> | <a href="http://www.irish-mojo.de">Irish Mojo</a> | <a href="http://tobias-radloff.de/blog/">tobias-radloff.de</a>
 			</div> <!-- footer -->
-
 		</div> <!-- wrap -->
 
 		<div id="credit">
 			CSS Template by <a href="http://ramblingsoul.com" title="Download High Quality CSS Templates">RamblingSoul.com</a>
 		</div> <!-- credit -->
-
 	</body>
 </html>

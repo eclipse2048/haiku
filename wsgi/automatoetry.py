@@ -30,12 +30,10 @@ import re
 import libleipzig
 from httplib import HTTPConnection
 
-# Umgebungsvariablen mit Credentials fuer die Wortschatz-API einlesen
+# Credentials fuer die Wortschatz-API einlesen
 WORTSCHATZ_CREDENTIALS = ("anonymous", "anonymous")
 if "WORTSCHATZ_USER" in os.environ and "WORTSCHATZ_PASSWORD" in os.environ:
 	WORTSCHATZ_CREDENTIALS = (os.environ["WORTSCHATZ_USER"], os.environ["WORTSCHATZ_PASSWORD"])
-## Alternative (fuer wenn das Problem mit dem Call-Limit geloest ist):
-#WORTSCHATZ_CREDENTIALS = (os.environ.get("WORTSCHATZ_USER", "anonymous"), os.environ.get("WORTSCHATZ_PASSWORD", "anonymous"))
 
 
 # Konstanten fuer die Silbenzaehlung
@@ -142,19 +140,23 @@ class Haiku:
 		u"""Gibt ein zufaelliges Startwort zurueck.
 		"""
 		# Seite mit Zufallswort von Wordreference.com anfordern
-		conn = HTTPConnection("www.wordreference.com")
-#		conn.set_debuglevel(1) #DEBUG
-		conn.putrequest("GET", "/random/deen")
-		conn.putheader("accept-encoding", "utf-8")
-		conn.putheader("user-agent", "python-httplib")
-		conn.endheaders()
-		resp = conn.getresponse()
-		page = resp.read()
-		conn.close()
+		try:
+			conn = HTTPConnection("www.wordreference.com")
+#			conn.set_debuglevel(1) #DEBUG
+			conn.putrequest("GET", "/random/deen")
+			conn.putheader("accept-encoding", "utf-8")
+			conn.putheader("user-agent", "python-httplib")
+			conn.endheaders()
+			resp = conn.getresponse()
+			page = resp.read()
+			conn.close()
+		except Exception, e:
+			print "getRandomSeedword(): HTTP-Request konnte nicht durchgefuehrt werden: ", e
+			return DEFAULT_SEEDWORD
 
 		# Fehler abfangen
 		if resp.status != 200:
-			print "getRandomSeedword(): HTTP request fehlgeschlagen mit Status", resp.status, resp.reason
+			print "getRandomSeedword(): HTTP-Request fehlgeschlagen mit Status", resp.status, resp.reason
 			return DEFAULT_SEEDWORD
 
 		# Wort suchen und zurueckgeben

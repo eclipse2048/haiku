@@ -1,0 +1,41 @@
+$def with (haikus, count, page, note)
+
+$var jsfiles:
+
+$if note == "HaikuAdded":
+	<p class="highlight">Haiku wurde hinzugef&uuml;gt.</p>
+
+<h1>
+	Galerie
+	<span class="seo">Eine kleine Auswahl der schönsten Haikus</span>
+</h1>
+
+$for haiku in haikus:
+	<h2>
+		$haiku.content.split("\n")[0]
+		<span class="seo">Geschrieben von Projekt Haiku und <strong>$haiku.author</strong></span>
+	</h2>
+	<blockquote><cite>
+	$for l in haiku.content.split("\n"):
+		$l <br />
+	</cite></blockquote>
+	$if haiku.comment:
+		<p><strong>Kommentar des Autors:</strong> $haiku.comment</p>
+	<p>Startwort: <cite>$haiku.seedword</cite>, Gene: <cite>$haiku.genes</cite> <br />
+		Algorithmus: <cite>$haiku.algorithm</cite>, Generation: <cite>$haiku.generation</cite>
+	</p>
+	<p class="postinfo">Ver&ouml;ffentlicht: $haiku.posted_on</p>
+
+<p class="highlight" align="center">
+	$ pageNum = int(round(count/10  + .5))
+	$if page > 2:
+		<a href="?page=1">&lt;&lt; Anfang</a>
+	$if page > 1:
+		<a href="?page=$(page-1)">&lt; Zur&uuml;ck</a>
+	Seite $page von $pageNum
+	$if (page*10 - count) < 0:
+		<a href="?page=$(page+1)">Vor &gt;</a>
+	$if (page*10 - count) < -10:
+		<a href="?page=$(pageNum)">Ende &gt;&gt;</a>
+</p>
+

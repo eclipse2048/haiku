@@ -2,24 +2,24 @@
 
 jQuery(document).ready( function() {
 
-	console.log("/do Document ist ready."); //DEBUG
-
-	// Funktion, die die Kinder der juengsten Generation zur Tabelle hinzufuegt
+	// Fuegt die Kinder der juengsten Generation der Tabelle hinzu
 	function addTableRow(jsonData) {
-		// juengste Tabellenzeile auswaehlen
 		jQuery("tr.latest")
 			// Kind-Haikus einfuegen
-			.html("\
-				<th class=\"genCount\">" + jsonData[2] + "</td>\
-				<td align=\"center\" class=\"phenotype\" title=\"Seedwort: " + jsonData[0][0] + " \nGene: " + jsonData[0][1] + "\">" + jsonData[0][2].split("\n").join("<br />") + "</td>\
-				<td align=\"center\" class=\"phenotype\" title=\"Seedwort: " + jsonData[1][0] + " \nGene: " + jsonData[1][1] + "\">" + jsonData[1][2].split("\n").join("<br />") + "</td>")
+			.html('<th class="genCount">' + jsonData[2] + '</th>\
+				<td align="center" class="phenotype" title="Startwort: ' + jsonData[0][0] + ' \nGene: ' + jsonData[0][1] + '">' + jsonData[0][2].split('\n').join('<br />') + '</td>\
+				<td align="center" class="phenotype" title="Startwort: ' + jsonData[1][0] + ' \nGene: ' + jsonData[1][1] + '">' + jsonData[1][2].split('\n').join('<br />') + '</td>\
+				<td class="share"><form method="post" action="/share" target="_blank"></form></td>')
 			// tr.latest zu tr.older machen
 			.attr("class", "older")
 			// neue juengste Tabellenzeile erzeugen
-			.after("<tr class=\"empty\"><br /></tr><tr class=\"latest\" />");
+			.after('<tr class="empty"><br /></tr><tr class="latest" />');
 
-		// nach unten scrollen
-		jQuery("html,body").animate({ scrollTop: jQuery("body").css("height") });
+		// nach unten scrollen (aber nicht ganz)
+		var heightStr = jQuery("div#pagecontent").css("height");
+		var matches = heightStr.match(/\d+/);
+		var height = parseInt(matches[0], 10);
+		jQuery("html, body").animate({ scrollTop: (height-80) + "px" });
 	};
 
 	var finished1, finished2;
@@ -32,13 +32,35 @@ jQuery(document).ready( function() {
 		dataType: "json",
 
 		success: function(jsonData) {
-			console.log("/do Initialer Ajax-Aufruf Teil 1 -> Success-Function: jsonData ist " + jsonData.split("\n").join("<br />")); //DEBUG
-			jQuery("tr.parent td.phenotype").html(jsonData.split("\n").join("<br />"));
+			console.log("/haiku Initialer Ajax-Aufruf Teil 1 -> Success-Function: jsonData ist " + jsonData.split("\n").join("<br />")); //DEBUG
+
+			// Phaenotyp einfuegen
+			jQuery("tr.genZero td.phenotype").html(jsonData.split("\n").join("<br />"));
+
+			// Daten fuer die Share-Funktion sammeln
+			var content = jQuery("tr.genZero td.phenotype").html();
+			var generation = jQuery("tr.genZero th.genCount").html();
+			var genotype = new String(jQuery("tr.genZero td.phenotype").attr("title"));
+			var lineBreakPos = genotype.indexOf("\n")
+			var seedword = genotype.substring(11, lineBreakPos-1);
+			var genes = genotype.substring(lineBreakPos+7)
+
+			// Share-Button einfuegen
+			jQuery("tr.genZero td.share").html('<form method="post" action="/share" target="_blank">\
+				<input name="content" type="hidden" value="' + content + '" />\
+				<input name="generation" type="hidden" value="' + generation + '" />\
+				<input name="seedword" type="hidden" value="' + seedword + '" />\
+				<input name="genes" type="hidden" value="' + genes + '" />\
+				<input class="button" type="submit" value="in die Galerie" />\
+			</form>');
 		},
 
 		error: function(xhr, status, error) {
-			console.log("/do Initialer AJAX-Aufruf Teil 1 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.</p>');
+			console.log("/haiku Initialer AJAX-Aufruf Teil 1 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+			jQuery("div.errorMsg").html('<p class="highlight">\
+				Ein Fehler ist aufgetreten: ' + error + '<br />\
+				Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.\
+			</p>');
 		},
 
 		complete: function() {
@@ -54,16 +76,26 @@ jQuery(document).ready( function() {
 		dataType: "json",
 
 		success: function(jsonData) {
-			console.log("/do Initialer Ajax-Aufruf Teil 2 -> Success-Function: jsonData ist", jsonData); //DEBUG
-			addTableRow(jsonData); // Kinder-Zeile hinzufuegen
+			console.log("/haiku Initialer Ajax-Aufruf Teil 2 -> Success-Function: jsonData ist", jsonData); //DEBUG
+
+			// Kinder-Zeile hinzufuegen
+			addTableRow(jsonData);
 
 			// Button-Zeile hinzufuegen
-			jQuery("tr.latest").after('<tr class="button-row"><td /><td><form method="post"><input class="button" type="submit" value="Linkes Kind-Gedicht" id="l" /></form></td><td><form method="post"><input class="button" type="submit" value="Rechtes Kind-Gedicht" id="r" /></td></form></tr>');
+			jQuery("tr.latest").after('<tr class="button-row">\
+				<td class="genCount"/>\
+				<td><form method="post"><center><input class="button" type="submit" value="Linkes Kind-Gedicht" id="l" /></center></form></td>\
+				<td><form method="post"><input class="button" type="submit" value="Rechtes Kind-Gedicht" id="r" /></form></td>\
+				<td class="share" />\
+			</tr>');
 		},
 
 		error: function(xhr, status, error) {
-			console.log("/do Initialer AJAX-Aufruf Teil 2 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-			jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es <a href="" class="errorReload">noch einmal</a>.</p>');
+			console.log("/haiku Initialer AJAX-Aufruf Teil 2 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+			jQuery("div.errorMsg").html('<p class="highlight">\
+				Ein Fehler ist aufgetreten: ' + error + '<br /> \
+				Bitte versuchen Sie es <a href="" class="errorReload">noch einmal</a>.\
+			</p>');
 		},
 
 		complete: function() {
@@ -81,15 +113,13 @@ jQuery(document).ready( function() {
 		if (errorType && errorTarget) {
 			jQuery(errorTarget).trigger(errorType);
 			return false;
-		} else {
-			location.reload();
-		}
+		} else { location.reload(); }
 	});
 
 	// Definiere Event-Handler fuer die Kind-Buttons
 	jQuery("table").on("click", "tr.button-row input.button", function(event) {
-		console.log("/do: Event-Typ ist " + event.type + " und Event-Ziel ist " + event.target.nodeName);
 
+		// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
 		errorTarget = event.target;
 
@@ -97,8 +127,9 @@ jQuery(document).ready( function() {
 		jQuery("div.errorMsg").html("");
 
 		// Warteanimation einfuegen
-		jQuery("tr.latest").html("<td colspan=\"3\"><div align=\"center\" id=\"loading\" style=\"display:block\"><img src=\"/static/ajax-loader.gif\" /></div></td>");
+		jQuery("tr.latest").html('<td /><td colspan="2"><div align="center" id="loading" style="display:block"><img src="/static/ajax-loader.gif" /></div></td><td />');
 
+		// Button-Identifier festhalten
 		var callButton = jQuery(this).attr("id");
 		var lr = (callButton == "l") ? 1 : 0;
 
@@ -113,16 +144,39 @@ jQuery(document).ready( function() {
 			dataType: "json",
 
 			success: function(jsonData) {
-				console.log("input.button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+				console.log("/haiku input.button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
 
 				// verstecktes Kind loeschen
 				jQuery("tr.older:last td.phenotype").eq(lr).remove();
+
+				// Daten fuer die Share-Funktion sammeln
+				var content = jQuery("tr.older:last td.phenotype").html();
+				var generation = jQuery("tr.older:last th.genCount").html();
+				var genotype = new String(jQuery("tr.older:last td.phenotype").attr("title"));
+				var lineBreakPos = genotype.indexOf("\n")
+				console.log("/haiku: genotype ist " + genotype + " und lineBreakPos ist " + lineBreakPos);
+				var seedword = genotype.substring(11, lineBreakPos-1);
+				var genes = genotype.substring(lineBreakPos+7)
+
+				// Share-Button einfuegen
+				jQuery("tr.older:last td.share").html('<form method="post" action="/share" target="_blank">\
+					<input name="content" type="hidden" value="' + content + '" />\
+					<input name="generation" type="hidden" value="' + generation + '" />\
+					<input name="seedword" type="hidden" value="' + seedword + '" />\
+					<input name="genes" type="hidden" value="' + genes + '" />\
+					<input class="button" type="submit" value="in die Galerie" />\
+				</form>');
+
+				// Kind-Zeile hinzufuegen
 				addTableRow(jsonData);
 			},
 
 			error: function(xhr, status, error) {
-				console.log("/do AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
-				jQuery("div.errorMsg").html('<p>Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte führen Sie Ihre Aktion erneut aus oder versuchen Sie es <a href="" class="errorRetrigger">erneut</a>.</p>');
+				console.log("/haiku AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+				jQuery("div.errorMsg").html('<p class="highlight">\
+					Ein Fehler ist aufgetreten: ' + error + '<br /> \
+					Bitte führen Sie Ihre Aktion <a href="" class="errorRetrigger">erneut aus</a>.\
+				</p>');
 
 				// verstecktes Kind wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");
@@ -133,4 +187,6 @@ jQuery(document).ready( function() {
 		});
 		return false;
 	});
+
+	console.log("/haiku Document ist ready."); //DEBUG
 });

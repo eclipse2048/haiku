@@ -44,7 +44,7 @@ body {
 }*/
 
 #pagecontent {
-	width: 470px;
+	width: 570px; /*470px;*/
 	padding: 3px;
 	float: left;
 }
@@ -207,7 +207,7 @@ code {
 	float: left;
 	line-height: 1px;
 	font-size: 1px;
-	widows: 5px;
+/*	widows: 5px; */
 	height: 5px;
 	border: solid 3px #F0F3E4;
 	width: 5px;
@@ -218,6 +218,7 @@ code {
 .highlight {
 	background: #ffffcc;
 	color: #000000;
+	text-align: center; /* funzt leider nicht; "#content #pagecontent p" scheint Praezedenz zu haben. Schade */
 }
 
 #pagecontent .postinfo {
@@ -265,6 +266,10 @@ table {
 	margin: 10px 0 10px 0;
 /*	border: solid 1px #BDDB99; */
 	font-size: 13px;
+}
+
+form th {
+	background: none;
 }
 
 th {
@@ -342,7 +347,7 @@ td {
 
 #sidebar table {
 /*	background: #EAEBD3; */
-	width: 470px;
+	width: 100%;
 	height: 20px;
 	table-layout: fixed;
 }
@@ -377,7 +382,7 @@ form {
 .textfield {
 	display: block;
 	float: left;
-	width: 190px;
+/*	width: 190px; */
 	background-color: #F3F4E8;
 	margin: 3px;
 	border: 1px solid #D6D9AE;
@@ -470,18 +475,24 @@ select {
 }
 
 
+/* {
+	color: red;
+} */
+
+
 /* TODO:
- * .errorMsg
- * .errorReload
- * .errorRetrigger
- * .haiku
- * .parent
- * .phenotype
- * .older
- * .latest
- * .gencount
- * .empty
- * .button-row,
- * #loading
- * .wrong (Validator-Nachricht)
+.errorMsg
+.errorReload
+.errorRetrigger
+.haiku
+.genZero
+.phenotype
+.older
+.latest
+.gencount
+.empty
+.button-row,
+#loading
+.wrong (Validator-Nachricht)
+.share
  */
