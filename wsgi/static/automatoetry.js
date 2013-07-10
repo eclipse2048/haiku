@@ -2,6 +2,9 @@
 
 jQuery(document).ready( function() {
 
+	var finished1, finished2, errorType, errorTarget;
+	jQuery("#loading").show();
+
 	// Fuegt die Kinder der juengsten Generation der Tabelle hinzu
 	function addTableRow(jsonData) {
 		jQuery("tr.latest")
@@ -9,7 +12,7 @@ jQuery(document).ready( function() {
 			.html('<th class="genCount">' + jsonData[2] + '</th>\
 				<td align="center" class="phenotype" title="Startwort: ' + jsonData[0][0] + ' \nGene: ' + jsonData[0][1] + '">' + jsonData[0][2].split('\n').join('<br />') + '</td>\
 				<td align="center" class="phenotype" title="Startwort: ' + jsonData[1][0] + ' \nGene: ' + jsonData[1][1] + '">' + jsonData[1][2].split('\n').join('<br />') + '</td>\
-				<td class="share"><form method="post" action="/share" target="_blank"></form></td>')
+				<td class="share"><form method="post"><input class="button" type="submit" value="Kinder neu erzeugen" id="newKids" /></form></td>')
 			// tr.latest zu tr.older machen
 			.attr("class", "older")
 			// neue juengste Tabellenzeile erzeugen
@@ -22,13 +25,10 @@ jQuery(document).ready( function() {
 		jQuery("html, body").animate({ scrollTop: (height-80) + "px" });
 	};
 
-	var finished1, finished2;
-	jQuery("#loading").show();
-
 	// Initialen Ajax-Request Teil 1 abschicken (Phaenotyp der Ausgangsgeneration)
 	jQuery.ajax({
 		type: "POST",
-		data: {query: 0},
+		data: {query: "genZero"},
 		dataType: "json",
 
 		success: function(jsonData) {
@@ -51,7 +51,7 @@ jQuery(document).ready( function() {
 				<input name="generation" type="hidden" value="' + generation + '" />\
 				<input name="seedword" type="hidden" value="' + seedword + '" />\
 				<input name="genes" type="hidden" value="' + genes + '" />\
-				<input class="button" type="submit" value="in die Galerie" />\
+				<input class="button" type="submit" value="in Galerie aufnehmen" />\
 			</form>');
 		},
 
@@ -72,7 +72,7 @@ jQuery(document).ready( function() {
 	// Initialen Ajax-Request Teil 2 (Phaenotypen Ausgangsgeneration +1) abschicken
 	jQuery.ajax({
 		type: "POST",
-		data: {query: 1},
+		data: {query: "newKids"},
 		dataType: "json",
 
 		success: function(jsonData) {
@@ -104,9 +104,6 @@ jQuery(document).ready( function() {
 		}
 	});
 
-	var errorType, errorTarget;
-//	console.log("errorType und -Target sind " + errorType + ", " + errorTarget);
-
 	jQuery("div.errorMsg").on("click", "a.errorReload", function() { location.reload(); });
 
 	jQuery("div.errorMsg").on("click", "a.errorRetrigger", function() {
@@ -116,7 +113,7 @@ jQuery(document).ready( function() {
 		} else { location.reload(); }
 	});
 
-	// Definiere Event-Handler fuer die Kind-Buttons
+	// Definiere Event-Handler fuer Kind-Buttons
 	jQuery("table").on("click", "tr.button-row input.button", function(event) {
 
 		// Event-Daten speichern fuer Retrigger-Link
@@ -137,6 +134,9 @@ jQuery(document).ready( function() {
 		jQuery("tr.older:last td.phenotype").eq(lr).hide();
 		jQuery("tr.older:last td.phenotype").eq(1-lr).attr("colspan", "2"); // mit .animate() in die Mitte sliden?
 
+		// Neue-Kinder-Button verstecken
+		jQuery("tr.older:last td.share").hide()
+
 		// Sende AJAX-Request
 		jQuery.ajax({
 			type: "POST",
@@ -144,7 +144,7 @@ jQuery(document).ready( function() {
 			dataType: "json",
 
 			success: function(jsonData) {
-				console.log("/haiku input.button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+				console.log("/haiku Kind-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
 
 				// verstecktes Kind loeschen
 				jQuery("tr.older:last td.phenotype").eq(lr).remove();
@@ -164,8 +164,9 @@ jQuery(document).ready( function() {
 					<input name="generation" type="hidden" value="' + generation + '" />\
 					<input name="seedword" type="hidden" value="' + seedword + '" />\
 					<input name="genes" type="hidden" value="' + genes + '" />\
-					<input class="button" type="submit" value="in die Galerie" />\
-				</form>');
+					<input class="button" type="submit" value="in Galerie aufnehmen" />\
+				</form>')
+				.show();
 
 				// Kind-Zeile hinzufuegen
 				addTableRow(jsonData);
@@ -181,6 +182,60 @@ jQuery(document).ready( function() {
 				// verstecktes Kind wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");
 				jQuery("tr.older:last td.phenotype").eq(lr).show();
+			},
+
+			complete: function() {	jQuery("#loading").hide(); },
+		});
+		return false;
+	});
+
+	// Definiere Event-Handler fuer Neue-Kinder-Button
+	jQuery("table").on("click", "tr.older:last input.button", function(event) {
+		console.log('/haiku Button "Neue Kinder erzeugen" gedrueckt!');
+
+		// Event-Daten speichern fuer Retrigger-Link
+		errorType = event.type;
+		errorTarget = event.target;
+
+		// evtl. Fehlermeldung loeschen
+		jQuery("div.errorMsg").html("");
+
+		// Warteanimation einfuegen
+		jQuery("tr.latest").html('<td /><td colspan="2"><div align="center" id="loading" style="display:block"><img src="/static/ajax-loader.gif" /></div></td><td />');
+
+		// Kinder und Button verstecken
+		jQuery("tr.older:last td").hide();
+
+		// Sende AJAX-Request
+		jQuery.ajax({
+			type: "POST",
+			data: {query: jQuery(this).attr("id")},
+			dataType: "json",
+
+			success: function(jsonData) {
+				console.log("/haiku Neue-Kinder-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+
+				// alte Kinder durch neue ersetzen
+				jQuery("tr.older:last td.phenotype:first")
+					.attr('title', 'Startwort: ' + jsonData[0][0] + ' \nGene: ' + jsonData[0][1])
+					.html(jsonData[0][2].split('\n').join('<br />'))
+					.show();
+				jQuery("tr.older:last td.phenotype:last")
+					.attr('title', 'Startwort: ' + jsonData[1][0] + ' \nGene: ' + jsonData[1][1])
+					.html(jsonData[1][2].split('\n').join('<br />'))
+					.show();
+				jQuery("tr.older:last td.share").show();
+			},
+
+			error: function(xhr, status, error) {
+				console.log("/haiku AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+				jQuery("div.errorMsg").html('<p class="highlight">\
+					Ein Fehler ist aufgetreten: ' + error + '<br /> \
+					Bitte führen Sie Ihre Aktion <a href="" class="errorRetrigger">erneut aus</a>.\
+				</p>');
+
+				// verstecktes Kind wieder anzeigen
+				jQuery("tr.older:last td").show();
 			},
 
 			complete: function() {	jQuery("#loading").hide(); },

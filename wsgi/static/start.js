@@ -7,7 +7,6 @@ jQuery(document).ready(function() {
 	// Den Buttons Event-Handler zuweisen.
 	jQuery("form").on("click", "button.button", function() {
 		jQuery("div.errorMsg").html("");
-		jQuery("#loading").show();
 
 		// Los-Button: Formular abschicken
 		if (jQuery(this).attr("id") == "Los") {
@@ -15,8 +14,11 @@ jQuery(document).ready(function() {
 			return false;
 		};
 
-		// Neue/s-Buttons: Ajax-Request
+		// Warteanimation anzeigen
+		jQuery("#loading").show();
 		var callButton = jQuery(this).attr("id");
+
+		// Neue/s-Buttons: Ajax-Request abschicken
 		jQuery.ajax({
 			type: "POST",
 			data: {caller: callButton},

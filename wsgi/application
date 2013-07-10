@@ -24,7 +24,8 @@
 from __future__ import division, absolute_import
 import os
 
-if "OPENSHIFT_PYTHON_DIR" in os.environ: # alternativ: import platform; if platform.node == [OPENSHIFT-whatever]: ...
+if "OPENSHIFT_PYTHON_DIR" in os.environ:
+# alternativ: import platform; if platform.node() == "ex-std-node155.prod.rhcloud.com":
 	RUNS_ON_OPENSHIFT = True
 else:
 	RUNS_ON_OPENSHIFT = False
@@ -76,7 +77,6 @@ session = web.session.Session(app, web.session.DiskStore(sessionsDir))
 
 # erzeuge Datenbank-Objekt
 if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD" in os.environ:
-	print "application: $OPENSHIFT_MYSQL_DB_URL ist", os.environ["OPENSHIFT_MYSQL_DB_URL"] #DEBUG
 	db = web.database(
 		host = os.environ["OPENSHIFT_MYSQL_DB_HOST"],
 		port = int(os.environ["OPENSHIFT_MYSQL_DB_PORT"]),
@@ -87,21 +87,23 @@ if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD"
 	)
 elif "HAIKU_MYSQL_USER" in os.environ and "HAIKU_MYSQL_PASSWORD" in os.environ:
 	db = web.database(
-		dbn = 'mysql',
-		db = 'haiku',
-		user = os.environ["HAIKU_MYSQL_USER"],
-		pw = os.environ["HAIKU_MYSQL_PASSWORD"]
+		dbn='mysql',
+		db='haiku',
+		user=os.environ["HAIKU_MYSQL_USER"],
+		pw=os.environ["HAIKU_MYSQL_PASSWORD"]
 	)
 else:
-	db = web.database(dbn='mysql', db='haiku', user="haiku", pw="automatoetry") #DEBUG
-#	db = None # @TODO: Fehlerbehandlung?
-print "application: db ist", db #DEBUG
+	print "application: Keine Datenbank-Credentials gefunden. Setze db=None"
+	db = None # @TODO: Ernsthafte Fehlerbehandlung?
 
 
 # Datenbankfunktionen
 def getHaikus(page=1):
 	u"""@TODO: Beschreibung fehlt
 	"""
+	if db == None:
+		#raise SomeError
+		pass
 	limit = 10
 	offset = (page - 1) * limit
 	countResult = db.query("SELECT count(*) from haiku")
@@ -113,6 +115,9 @@ def getHaikus(page=1):
 def addHaiku(inputData):
 	u"""@TODO: Beschreibung fehlt
 	"""
+	if db == None:
+		#raise SomeError
+		pass
 	db.insert(
 		'haiku',
 		content = inputData.content,
@@ -285,9 +290,9 @@ class Automatoetry:
 		input = web.input()
 		print "/haiku POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
-		if input.query == "0": # initialer Ajax-Aufruf Teil 1
+		if input.query == "genZero": # initialer Ajax-Aufruf Teil 1
 			return json.dumps(session.haiku.getPhenotype())
-		elif input.query == "1": # initialer Ajax-Aufruf Teil 2
+		elif input.query == "newKids": # initialer Ajax-Aufruf Teil 2 bzw. neue Kinder
 			parent = session.haiku
 		elif input.query == "l": # Linkes Kind
 			parent = session.haiku.getChildren()[0]
