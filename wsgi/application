@@ -22,10 +22,9 @@
 #
 
 from __future__ import division, absolute_import
-import os
+import os, platform
 
-if "OPENSHIFT_PYTHON_DIR" in os.environ:
-# alternativ: import platform; if platform.node() == "ex-std-node155.prod.rhcloud.com":
+if platform.node() == "ex-std-node155.prod.rhcloud.com":
 	RUNS_ON_OPENSHIFT = True
 else:
 	RUNS_ON_OPENSHIFT = False
@@ -46,15 +45,19 @@ import json
 import tempfile
 import datetime
 from automatoetry import Haiku, GENES_REGEXP
+#from docutils.core import publish_parts
+import markdown
 
 # Initialisierungsvariablen fuer web.py
-web.config.debug = False
+web.config.debug = False #True
+print "application: Debug ist", web.config.debug #DEBUG
 urls = (
 	"/", "GenerationZero",
 	"/gallery", "Gallery",
 	"/haiku", "Automatoetry",
 	"/share", "Share",
 	"/add", "AddHaiku",
+	"/faq", "FAQ",
 )
 render = web.template.render(
 	os.path.abspath(os.path.dirname(__file__)) + "/templates/",
@@ -73,10 +76,15 @@ if RUNS_ON_OPENSHIFT:
 	sessionsDir = os.environ["OPENSHIFT_DATA_DIR"] + "sessions/"
 else:
 	sessionsDir = tempfile.gettempdir() + "/sessions/"
-session = web.session.Session(app, web.session.DiskStore(sessionsDir))
+# session = web.session.Session(app, web.session.DiskStore(sessionsDir)) # fkt. nur mit web.config.debug = False
+if web.config.get('_session') is None:
+    session = web.session.Session(app, web.session.DiskStore(sessionsDir), {'count': 0})
+    web.config._session = session
+else:
+    session = web.config._session
 
 # erzeuge Datenbank-Objekt
-if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD" in os.environ:
+if RUNS_ON_OPENSHIFT:
 	db = web.database(
 		host = os.environ["OPENSHIFT_MYSQL_DB_HOST"],
 		port = int(os.environ["OPENSHIFT_MYSQL_DB_PORT"]),
@@ -103,7 +111,7 @@ def getHaikus(page=1):
 	"""
 	if db == None:
 		#raise SomeError
-		pass
+		pass #DEBUG
 	limit = 10
 	offset = (page - 1) * limit
 	countResult = db.query("SELECT count(*) from haiku")
@@ -117,7 +125,7 @@ def addHaiku(inputData):
 	"""
 	if db == None:
 		#raise SomeError
-		pass
+		pass #DEBUG
 	db.insert(
 		'haiku',
 		content = inputData.content,
@@ -218,7 +226,7 @@ class GenerationZero:
 		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
 		web.form.Dropdown(
 			"Algorithmus",
-			[(f, f + " (" + Haiku.devFuncDescriptions[f] + ") ") for f in Haiku().getDevFunctions() if not Haiku.devFuncDescriptions[f].startswith("Debug")]
+			[(f, f + " (" + Haiku.devFuncDescriptions[f] + ") ") for f in Haiku().getDevFunctions() if not Haiku.devFuncDescriptions[f].startswith("Debug") or web.config.debug == True]
 		),
 		web.form.Button("Los", class_ = "button")
 	)
@@ -310,7 +318,25 @@ class Automatoetry:
 		# Kinder-Daten zurueckgeben
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
+
+		print 2/0 #DEBUG
+
 		return json.dumps(data)
+
+
+class FAQ:
+	def __init__(self):
+		f = open("static/FAQ.md", "r")
+		src = f.read().decode("utf-8")
+		f.close()
+		self.faq = markdown.markdown(src, encoding="utf-8")
+		# TOC erzeugen
+
+	def GET(self):
+		return render.faq(self.faq)
+
+	def POST(self):
+		raise web.seeother("/faq")
 
 
 if __name__ == '__main__':

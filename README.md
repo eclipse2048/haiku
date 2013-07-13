@@ -6,7 +6,7 @@ Dieses Programm ist Open Source und steht unter der Gnu Public License (GPL). De
 Die Idee
 --------
 
-Automatoetry ist der Versuch, mit einer Verbindung von computerisiertem Ausprobieren und dem menschlichen Sinn für Schönheit Poesie zu erschaffen. Ob es klappt? Ich habe keine Ahnung.
+Automatoetry ist der Versuch, aus dem Zusammenspiel von computerisiertem Ausprobieren und dem menschlichen Sinn für Schönheit heraus Poesie zu erschaffen. Ob es klappt? Ich habe keine Ahnung.
 
 Das Medium der Wahl sind Haikus, eine japanische Gedichtform, die aus drei Zeilen mit 5, 7 und 5 Silben besteht.
 
@@ -30,9 +30,10 @@ Technische Details
 **Dependencies**
 
 * Python 2.6
-* web.py 0.34
+* web.py 0.37
 * libleipzig 1.3
 * MySQL-python 1.2.3
+* python-markdown
 
 **Weitere Quellen**
 

@@ -4,13 +4,14 @@ $def with (content)
 
 <html>
 	<head>
-		<title>Automatoetry - Haikus mit Mensch und Maschine</title>
+		<title>$content.title - Automatoetry</title>
 		<link rel="stylesheet" type="text/css" href="/static/featherlight.css" />
-		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js" />
+<!--		<script src="/static/jquery-1.10.1.min.js" /> -->
 		$if content.jsfiles:
 			$for f in content.jsfiles.split():
 				<script type="text/javascript" src="$f"></script>
-<!-- @TODO Favicon? -->
+		<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
 	</head>
 
 	<body>
@@ -26,7 +27,10 @@ $def with (content)
 			<div id="sidebar">
 				<table class="sidemenu">
 					<td>
-						<a href="/">Neu</a>
+						<a href="/">Neues Haiku</a>
+					</td>
+					<td>
+						<a href="/faq">FAQ</a>
 					</td>
 					<td>
 						<a href="/gallery">Galerie</a>

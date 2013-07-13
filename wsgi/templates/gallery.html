@@ -1,19 +1,20 @@
 $def with (haikus, count, page, note)
 
 $var jsfiles:
+$var title: Galerie
 
 $if note == "HaikuAdded":
 	<p class="highlight">Haiku wurde hinzugef&uuml;gt.</p>
 
 <h1>
 	Galerie
-	<span class="seo">Eine kleine Auswahl der schönsten Haikus</span>
+	<span class="seo">Eine Auswahl der schönsten Haikus</span>
 </h1>
 
 $for haiku in haikus:
 	<h2>
 		$haiku.content.split("\n")[0]
-		<span class="seo">Geschrieben von Projekt Haiku und <strong>$haiku.author</strong></span>
+		<span class="seo">Geschrieben von Projekt Haiku und <em>$haiku.author</em></span>
 	</h2>
 	<blockquote><cite>
 	$for l in haiku.content.split("\n"):
@@ -26,7 +27,7 @@ $for haiku in haikus:
 	</p>
 	<p class="postinfo">Ver&ouml;ffentlicht: $haiku.posted_on</p>
 
-<p class="highlight" align="center">
+<p class="postinfo" align="center">
 	$ pageNum = int(round(count/10  + .5))
 	$if page > 2:
 		<a href="?page=1">&lt;&lt; Anfang</a>

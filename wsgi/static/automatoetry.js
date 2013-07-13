@@ -12,7 +12,7 @@ jQuery(document).ready( function() {
 			.html('<th class="genCount">' + jsonData[2] + '</th>\
 				<td align="center" class="phenotype" title="Startwort: ' + jsonData[0][0] + ' \nGene: ' + jsonData[0][1] + '">' + jsonData[0][2].split('\n').join('<br />') + '</td>\
 				<td align="center" class="phenotype" title="Startwort: ' + jsonData[1][0] + ' \nGene: ' + jsonData[1][1] + '">' + jsonData[1][2].split('\n').join('<br />') + '</td>\
-				<td class="share"><form method="post"><input class="button" type="submit" value="Kinder neu erzeugen" id="newKids" /></form></td>')
+				<td class="share"><form method="post"><input class="button" type="submit" value="andere Kinder erzeugen" id="newKids" /></form></td>')
 			// tr.latest zu tr.older machen
 			.attr("class", "older")
 			// neue juengste Tabellenzeile erzeugen
@@ -135,7 +135,7 @@ jQuery(document).ready( function() {
 		jQuery("tr.older:last td.phenotype").eq(1-lr).attr("colspan", "2"); // mit .animate() in die Mitte sliden?
 
 		// Neue-Kinder-Button verstecken
-		jQuery("tr.older:last td.share").hide()
+		jQuery("tr.older:last td.share").hide();
 
 		// Sende AJAX-Request
 		jQuery.ajax({
@@ -154,7 +154,6 @@ jQuery(document).ready( function() {
 				var generation = jQuery("tr.older:last th.genCount").html();
 				var genotype = new String(jQuery("tr.older:last td.phenotype").attr("title"));
 				var lineBreakPos = genotype.indexOf("\n")
-				console.log("/haiku: genotype ist " + genotype + " und lineBreakPos ist " + lineBreakPos);
 				var seedword = genotype.substring(11, lineBreakPos-1);
 				var genes = genotype.substring(lineBreakPos+7)
 
@@ -182,6 +181,7 @@ jQuery(document).ready( function() {
 				// verstecktes Kind wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");
 				jQuery("tr.older:last td.phenotype").eq(lr).show();
+				jQuery("tr.older:last td.share").show();
 			},
 
 			complete: function() {	jQuery("#loading").hide(); },
@@ -191,9 +191,7 @@ jQuery(document).ready( function() {
 
 	// Definiere Event-Handler fuer Neue-Kinder-Button
 	jQuery("table").on("click", "tr.older:last input.button", function(event) {
-		console.log('/haiku Button "Neue Kinder erzeugen" gedrueckt!');
-
-		// Event-Daten speichern fuer Retrigger-Link
+	// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
 		errorTarget = event.target;
 

@@ -8,8 +8,9 @@ setup(
 	author_email = "mail@tobias-radloff.de",
 	url = "http://www.python.org/sigs/distutils-sig/",
 	install_requires = [
-		'web.py',
+		'web.py >= 0.37',
 		'libleipzig',
-		'MySQL-python'
+		'MySQL-python',
+		'python-markdown',
 	],
 )
