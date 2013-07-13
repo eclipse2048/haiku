@@ -11,6 +11,6 @@ setup(
 		'web.py >= 0.37',
 		'libleipzig',
 		'MySQL-python',
-		'python-markdown',
+		'Markdown >= 2',
 	],
 )
