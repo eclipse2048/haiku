@@ -59,25 +59,27 @@ In jeder Generation hast du zwei Haikus zur Auswahl. Ihr jeweiliger Genotyp ist 
 2.3 Welches Haiku soll ich wählen?
 ----------------------------------
 
-Dafür gibt es kein festes Kriterium und schon gar keinen Zwang. Nimm das, das dir besser gefällt. Oder das mehr Sinn ergibt als das andere, oder weniger Sinn. Oder das dich anspricht, ohne dass du sagen kannst, warum. Es ist ganz egal. Es gibt keinen Schiedsrichter, keine Punkte, keine Geschmackspolizei. Das Haiku soll dir gefallen, mehr nicht. Und wenn alles gut geht, stößt du irgendwann auf ein Gedicht, das tatsächlich schön ist (was immer das heißt).
+Dafür gibt es kein festes Kriterium und schon gar keinen Zwang. Nimm das, das dir besser gefällt. Oder das, das mehr Sinn ergibt als das andere, oder weniger Sinn. Oder das, das dich anspricht, ohne dass du sagen kannst, warum. Es ist ganz egal. Es gibt keinen Schiedsrichter, keine Punkte, keine Geschmackspolizei - das Haiku soll dir gefallen, mehr nicht. Und wenn alles gut geht, stößt du irgendwann auf ein Gedicht, das tatsächlich schön ist (was immer das heißt).
 
 
-2.4 Was hat es mit diesem "Startwort" und "Genen" auf sich?
+2.4 Was hat es mit diesem "Startwort" und den "Genen" auf sich?
 -------------------------------------------------------
 
-Sie sind die rohen Informationen, aus denen der Algorithmus ein Haiku erschafft. Biologisch gesprochen sind Startwort und Gene der Genotyp, während das Gedicht selbst den Phänotyp darstellt.
+Sie sind die rohen Informationen, aus denen der Algorithmus ein Haiku erzeugt. Biologisch gesprochen sind Startwort und Gene der Genotyp, während das Gedicht selbst den Phänotyp darstellt.
 
-Die Gene bestehen aus 5, 7 und 5 Kleinbuchstaben (einer für jede Silbe). Das Startwort gibt die Richtung vor, die das Gedicht inhaltlich einschlägt. Ändern sich Gene und/oder Startwort, so ändert sich (in der Regel) auch das Haiku selbst. Zufällige Mutationen im Genotyp führen dadurch zu neuen und vor allem unerwarteten Effekten.
+Die Gene bestehen aus 5, 7 und 5 Buchstaben zwischen "a" und "z" (einer für jede Silbe). Das Startwort gibt die Richtung vor, die das Gedicht inhaltlich einschlägt. Ändern sich Gene und/oder Startwort, so ändert sich (in der Regel) auch das Haiku selbst. Das bedeutet, dass zufällige Mutationen im Genotyp zu neuen und vor allem unerwarteten neuen Haikus führt.
 
-Tipp: Wenn du mit der Maus über ein beliebiges Haiku fährst, wird der Genotyp dafür angezeigt.
+Tipp: Wenn du mit der Maus über ein beliebiges Haiku fährst, wird dessen Genotyp angezeigt.
 
 
-2.5 Warum kann ich unter verschiedenen Algorithmen auswählen?
+2.5 Wozu kann ich unter verschiedenen Algorithmen auswählen?
 ----------------------------------------------------------
 
-Ich habe verschiedene Strategien ausprobiert, um aus einem Geno- einen Phänotyp zu erzeugen. Im Moment ist *LRColloc* der beste (und einzige) Algorithmus, der die Anforderungen zumindest zum Teil erfüllt. Zu diesen Anforderungen gehören unter anderem die Sinnhaftigkeit der erzeugten Haikus, die Variabilität (ähnliche Mutationen sollten zu unterschiedlichen Gedichten führen) und eine halbwegs zügige Laufzeit.
+Ich habe verschiedene Strategien ausprobiert, um aus einem Geno- einen Phänotyp zu erzeugen. Im Moment ist *LRColloc* der beste (und einzige) Algorithmus, der alle Anforderungen zumindest zum Teil erfüllt. Zu diesen Anforderungen gehören unter anderem die Sinnhaftigkeit der erzeugten Haikus, die Variabilität (kleine Mutationen im Genotyp sollen auch den Phänotyp verändern) und eine halbwegs zügige Laufzeit.
 
-Neben *LRColloc* sind noch viele weitere Algorithmen denkbar, um aus dem Geno- den Phänotyp zu erzeugen. Demnächst will ich den *TextRank*-Algorithmus unter die Lupe nehmen. Und zu Debugzwecken habe ich häufig *Loremipsum* benutzt, bei dem alle Haikus den gleichen, hartcodierten Inhalt haben. Langweilig, aber rasend schnell :-)
+Im Moment ist *LRColloc* der einzige Algorithmus, der zur Auswahl steht. Das soll sich noch ändern, und das wird es auch.
+
+Es sind ungezählte andere Vorgehensweisen denkbar, um aus dem Geno- den Phänotyp zu erzeugen. Demnächst will ich den *TextRank*-Algorithmus unter die Lupe nehmen. Und zu Debugzwecken habe ich häufig *Loremipsum* benutzt, bei dem alle Haikus den gleichen, hartcodierten Inhalt haben: Nicht besonders abwechslungsreich, dafür aber rasend schnell.
 
 
 2.6 Wie genau erzeugt ein Algorithmus ein Haiku?
