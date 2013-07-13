@@ -318,9 +318,7 @@ class Automatoetry:
 		# Kinder-Daten zurueckgeben
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
-
-		print 2/0 #DEBUG
-
+#		print 2/0 #DEBUG
 		return json.dumps(data)
 
 
