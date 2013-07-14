@@ -21,7 +21,7 @@ $for haiku in haikus:
 		$l <br />
 	</cite></blockquote>
 	$if haiku.comment:
-		<p><strong>Kommentar des Autors:</strong> $haiku.comment</p>
+		<p><strong>Kommentar des Autors / der Autorin:</strong> $haiku.comment</p>
 	<p>Startwort: <cite>$haiku.seedword</cite>, Gene: <cite>$haiku.genes</cite> <br />
 		Algorithmus: <cite>$haiku.algorithm</cite>, Generation: <cite>$haiku.generation</cite>
 	</p>
@@ -39,4 +39,3 @@ $for haiku in haikus:
 	$if (page*10 - count) < -10:
 		<a href="?page=$(pageNum)">Ende &gt;&gt;</a>
 </p>
-

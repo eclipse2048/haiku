@@ -13,21 +13,21 @@ Das Medium der Wahl sind Haikus, eine japanische Gedichtform, die aus drei Zeile
 Wie geht's?
 -----------
 
-Im Herzen von Automatoetry liegt ein genetischer Algorithmus, der Haikus erzeugen und zufällig mutieren lassen kann. Die hervorgebrachten "Kind"-Haikus sind ihrem Elter ähnlich, aber nicht komplett gleich; sie können sich in Details unterscheiden oder zur Gänze.
+Im Herzen von Automatoetry liegt ein genetischer Algorithmus, der Haikus erzeugt und zufällig mutieren lässt. Die hervorgebrachten Kind-Haikus ähneln ihrem Elter, sind aber nicht identisch; sie können sich in Details unterscheiden oder zur Gänze.
 
 Aufgabe des Benutzers ist es, aus den vorgeschlagenen Kind-Gedichten das schönere herauszusuchen. Von diesem werden neue Kinder erzeugt, der Nutzer wählt wieder aus und so weiter. Ein Ziel gibt es nicht. Es geht ums Experimentieren und um den Spaß an der Sprache.
 
-Idealerweise kommt nach vielen Generationen ein "schönes", also mehr oder weniger künstlerisches Haiku heraus. Eine Möglichkeit, die Ergebnisse von Automatoetry zu sammeln und zu veröffentlichen, ist in Arbeit.
+Idealerweise kommt nach vielen Generationen ein "schönes", also mehr oder weniger künstlerisches Haiku heraus. In der Galerie sind einige der Ergebnisse von Automatoetry gesammelt.
 
 Wo kann ich es ausprobieren?
 ----------------------------
 
-Eine aktuelle Version des Programms lässt sich hier auprobieren: http://haiku.tobias-radloff.de (gehostet von Openshift)
+Eine aktuelle Version des Programms steht hier bereit: http://haiku.tobias-radloff.de (gehostet von Openshift)
 
 Technische Details
 ------------------
 
-**Dependencies**
+**Abhängigkeiten**
 
 * Python 2.6
 * web.py 0.37

@@ -45,7 +45,6 @@ import json
 import tempfile
 import datetime
 from automatoetry import Haiku, GENES_REGEXP
-#from docutils.core import publish_parts
 import markdown
 
 # Initialisierungsvariablen fuer web.py

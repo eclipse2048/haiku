@@ -53,10 +53,10 @@ u"""Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
 	als einsilbiger Laut behandelt werden.
 """
 
-SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3, u"T-Shirt": 2}
+SYLLABLE_COUNT_EXCEPTIONS = {u"Pietät": 3, u"McDonald's": 3, u"T-Shirt": 2, u"orange": 2}
 u"""Dictionary mit Woertern, die anders getrennt werden als nach den
 	ueblichen Regeln. Bsp: Pi|e|taet statt Pie|taet. Das Wort ist der
-	key, die tatsaechliche Silbenzahl der value des Dictionary.
+	Schluessel, die tatsaechliche Silbenzahl der Wert des Dictionary.
 """
 
 # Regulaere Ausdruecke fuer __init__() und countSyllables()
