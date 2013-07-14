@@ -33,7 +33,7 @@ Technische Details
 * web.py 0.37
 * libleipzig 1.3
 * MySQL-python 1.2.3
-* python-markdown
+* python-markdown 2
 
 **Weitere Quellen**
 
