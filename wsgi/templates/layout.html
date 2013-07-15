@@ -7,7 +7,7 @@ $def with (content)
 		<title>$content.title - Automatoetry</title>
 		<link rel="stylesheet" type="text/css" href="/static/featherlight.css" />
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-<!--		<script src="/static/jquery-1.10.1.min.js" /> -->
+<!--<script src="/static/jquery-1.10.1.min.js" ></script> -->
 		$if content.jsfiles:
 			$for f in content.jsfiles.split():
 				<script type="text/javascript" src="$f"></script>

@@ -287,6 +287,14 @@ td {
 /*	border-right: 1px solid #DFEDCD; */
 }
 
+table.haiku td {
+	border-bottom: dashed 1px #DFEDCD;
+}
+
+table.haiku tr.button-row td {
+	border-bottom: none;
+}
+
 /*sidebar Menu*/
 #sidebar .sidemenu {
 	margin: 0;

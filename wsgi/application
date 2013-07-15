@@ -48,7 +48,7 @@ from automatoetry import Haiku, GENES_REGEXP
 import markdown
 
 # Initialisierungsvariablen fuer web.py
-web.config.debug = False #True
+web.config.debug = False
 print "application: Debug ist", web.config.debug #DEBUG
 urls = (
 	"/", "GenerationZero",
@@ -83,21 +83,14 @@ else:
     session = web.config._session
 
 # erzeuge Datenbank-Objekt
-if RUNS_ON_OPENSHIFT:
+if "OPENSHIFT_MYSQL_DB_USERNAME" in os.environ and "OPENSHIFT_MYSQL_DB_PASSWORD" in os.environ:
 	db = web.database(
-		host = os.environ["OPENSHIFT_MYSQL_DB_HOST"],
-		port = int(os.environ["OPENSHIFT_MYSQL_DB_PORT"]),
 		dbn = 'mysql',
 		db = 'haiku',
 		user = os.environ["OPENSHIFT_MYSQL_DB_USERNAME"],
-		pw = os.environ["OPENSHIFT_MYSQL_DB_PASSWORD"]
-	)
-elif "HAIKU_MYSQL_USER" in os.environ and "HAIKU_MYSQL_PASSWORD" in os.environ:
-	db = web.database(
-		dbn='mysql',
-		db='haiku',
-		user=os.environ["HAIKU_MYSQL_USER"],
-		pw=os.environ["HAIKU_MYSQL_PASSWORD"]
+		pw = os.environ["OPENSHIFT_MYSQL_DB_PASSWORD"],
+		host = os.environ.get("OPENSHIFT_MYSQL_DB_HOST", "localhost"),
+		port = int(os.environ.get("OPENSHIFT_MYSQL_DB_PORT", "80")),
 	)
 else:
 	print "application: Keine Datenbank-Credentials gefunden. Setze db=None"
@@ -317,7 +310,11 @@ class Automatoetry:
 		# Kinder-Daten zurueckgeben
 		data = [[c.getGenotype()[0], c.getGenotype()[1], c.getPhenotype()] for c in children]
 		data.append(str(children[0].getGeneration()))
+
+#		import time
+#		time.sleep(5)
 #		print 2/0 #DEBUG
+
 		return json.dumps(data)
 
 

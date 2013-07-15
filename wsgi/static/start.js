@@ -1,11 +1,13 @@
 // Disclaimer etc.
 
-jQuery(document).ready(function() {
+jQuery.support.cors = true;
 
-	console.log("/ Document is ready.");
+jQuery(document).ready(function() {
 
 	// Den Buttons Event-Handler zuweisen.
 	jQuery("form").on("click", "button.button", function() {
+
+		// evtl. Fehlermeldung loeschen
 		jQuery("div.errorMsg").html("");
 
 		// Los-Button: Formular abschicken
@@ -16,9 +18,9 @@ jQuery(document).ready(function() {
 
 		// Warteanimation anzeigen
 		jQuery("#loading").show();
-		var callButton = jQuery(this).attr("id");
 
 		// Neue/s-Buttons: Ajax-Request abschicken
+		var callButton = jQuery(this).attr("id");
 		jQuery.ajax({
 			type: "POST",
 			data: {caller: callButton},

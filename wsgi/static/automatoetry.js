@@ -1,5 +1,7 @@
 // Disclaimer etc.
 
+jQuery.support.cors = true;
+
 jQuery(document).ready( function() {
 
 	var finished1, finished2, errorType, errorTarget;
@@ -86,7 +88,7 @@ jQuery(document).ready( function() {
 				<td class="genCount"/>\
 				<td><form method="post"><center><input class="button" type="submit" value="Linkes Kind-Gedicht" id="l" /></center></form></td>\
 				<td><form method="post"><input class="button" type="submit" value="Rechtes Kind-Gedicht" id="r" /></form></td>\
-				<td class="share" />\
+				<td class="share">&nbsp;</td>\
 			</tr>');
 		},
 
@@ -115,6 +117,10 @@ jQuery(document).ready( function() {
 
 	// Definiere Event-Handler fuer Kind-Buttons
 	jQuery("table").on("click", "tr.button-row input.button", function(event) {
+//	jQuery("table.haiku:not(.disabled)").on("click", "tr.button-row input.button", function(event) {
+
+		// Klasse "disabled" zu Tabelle hinzufügen, um weiteren Buttonclicks zuvorzukommen
+//		jQuery("table.haiku").addClass("disabled");
 
 		// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
@@ -137,7 +143,7 @@ jQuery(document).ready( function() {
 		// Neue-Kinder-Button verstecken
 		jQuery("tr.older:last td.share").hide();
 
-		// Sende AJAX-Request
+		// AJAX-Request senden
 		jQuery.ajax({
 			type: "POST",
 			data: {query: callButton},
@@ -178,20 +184,24 @@ jQuery(document).ready( function() {
 					Bitte führen Sie Ihre Aktion <a href="" class="errorRetrigger">erneut aus</a>.\
 				</p>');
 
-				// verstecktes Kind wieder anzeigen
+				// verstecktes Kind und Button wieder anzeigen
 				jQuery("tr.older:last td.phenotype").eq(1-lr).removeAttr("colspan");
 				jQuery("tr.older:last td.phenotype").eq(lr).show();
 				jQuery("tr.older:last td.share").show();
 			},
 
-			complete: function() {	jQuery("#loading").hide(); },
+			complete: function() {
+				jQuery("#loading").hide();
+//				jQuery("table.haiku").removeClass("disabled");
+			},
 		});
 		return false;
 	});
 
 	// Definiere Event-Handler fuer Neue-Kinder-Button
 	jQuery("table").on("click", "tr.older:last input.button", function(event) {
-	// Event-Daten speichern fuer Retrigger-Link
+
+		// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
 		errorTarget = event.target;
 
