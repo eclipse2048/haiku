@@ -243,9 +243,9 @@ code {
 	padding: 3px;
 }
 
-#pagecontent ul li:hover {
+/*#pagecontent ul li:hover {
 	background: #E7EDDC;
-}
+}*/
 
 /*ordered list*/
 #pagecontent ol {
@@ -390,7 +390,7 @@ form {
 .textfield {
 	display: block;
 	float: left;
-/*	width: 190px; */
+	width: 280px;
 	background-color: #F3F4E8;
 	margin: 3px;
 	border: 1px solid #D6D9AE;
@@ -431,6 +431,10 @@ select {
 	background-color: #EBECE8;
 	margin: 3px;
 	border: 1px solid #D6D9AE;
+}
+
+textarea {
+	resize: none;
 }
 
 /*Tag Cloud*/

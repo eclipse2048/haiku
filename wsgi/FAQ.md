@@ -1,3 +1,5 @@
+[TOC]
+
 1. Fragen zu Automatoetry
 =========================
 

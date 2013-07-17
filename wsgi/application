@@ -258,6 +258,7 @@ class GenerationZero:
 				return render.start(f)
 			session.haiku = Haiku(f.d.seedword, f.d.genes)
 			Haiku.devFunction = input.Algorithmus
+			print "/ POST: Neuer Default-Algorithmus ist", Haiku.devFunction
 			raise web.seeother("/haiku")
 
 		# "Neu"-Button: neues Seedwort oder Gene zurueckgeben
@@ -325,11 +326,11 @@ class FAQ:
 		f = open(os.path.dirname(os.path.realpath(__file__)) + "/FAQ.md", "r")
 		src = f.read().decode("utf-8")
 		f.close()
-		self.faq = markdown.markdown(src, encoding="utf-8")
+		FAQ.faq = markdown.markdown(src, encoding="utf-8", extensions=["toc"])
 		# TOC erzeugen
 
 	def GET(self):
-		return render.faq(self.faq)
+		return render.faq(FAQ.faq)
 
 	def POST(self):
 		raise web.seeother("/faq")
