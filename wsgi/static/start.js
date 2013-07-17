@@ -1,7 +1,5 @@
 // Disclaimer etc.
 
-jQuery.support.cors = true;
-
 jQuery(document).ready(function() {
 
 	// Den Buttons Event-Handler zuweisen.

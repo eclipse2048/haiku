@@ -1,7 +1,5 @@
 // Disclaimer etc.
 
-jQuery.support.cors = true;
-
 jQuery(document).ready( function() {
 
 	var finished1, finished2, errorType, errorTarget;

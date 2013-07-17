@@ -291,7 +291,7 @@ table.haiku td {
 	border-bottom: dashed 1px #DFEDCD;
 }
 
-table.haiku tr.button-row td {
+table.haiku tr.button-row td, table.haiku tr.no-border td {
 	border-bottom: none;
 }
 

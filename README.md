@@ -1,7 +1,7 @@
 Automatoetry - Haikus mit Mensch und Maschine
 =============================================
 
-Dieses Programm ist Open Source und steht unter der Gnu Public License (GPL). Der Code ist frei kopierbar und darf nicht kommerziell verwendet werden, yadda yadda yadda.
+Dieses Programm ist Open Source und steht unter der Gnu Public License (GPL v2). Der Code ist frei kopierbar, darf unter keiner anderen Lizenz weiterverwendet werden, yadda yadda yadda.
 
 Die Idee
 --------
