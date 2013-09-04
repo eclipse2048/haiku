@@ -47,8 +47,9 @@ ONE_SYLLABLE_COMBINATIONS = (
 	u"ie", u"ii",
 	u"oo", u"ou", u"oy",
 	u"ui", u"uo", u"uu",
-	u"\xe4u"
-) # nicht enthalten: u"ae", u"oe", u"ue"
+	u"\xe4u",
+	u"ae", u"oe", u"ue"
+)
 u"""Alle Kombinationen von zwei Vokalen, die in der deutschen Sprache
 	als einsilbiger Laut behandelt werden.
 """

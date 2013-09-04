@@ -47,9 +47,11 @@ import tempfile
 import datetime
 from automatoetry import Haiku, GENES_REGEXP
 import markdown
+from urllib2 import URLError, HTTPError
+from suds import WebFault
 
 # Initialisierungsvariablen fuer web.py
-web.config.debug = False
+web.config.debug = False #True
 print "application: web.config.debug ist", web.config.debug #DEBUG
 urls = (
 	"/", "GenerationZero",
@@ -179,8 +181,7 @@ class AddHaiku:
 class Gallery:
 	def GET(self):
 		input = web.input()
-		note=input.get("note", "")
-		page = input.get("page", 1)
+		note, page = input.get("note", ""), input.get("page", 1)
 		try:
 			page = int(page)
 		except:
@@ -204,7 +205,7 @@ class GenerationZero:
 			web.form.notnull,
 			size = 19,
 			class_ = "textfield",
-			description = "Startwort:"
+			description = "Startwort"
 		),
 		web.form.Button("Neues Zufallswort", id = "newSeedword", class_ = "button"),
 		web.form.Textbox(
@@ -215,7 +216,7 @@ class GenerationZero:
 			size = 19,
 			maxlength = 19,
 			class_ = "textfield",
-			description = "Gene:"
+			description = "Gene"
 		),
 		web.form.Button("Neue Gene", id = "newGenes", class_ = "button"),
 		web.form.Dropdown(
@@ -294,7 +295,17 @@ class Automatoetry:
 		print "/haiku POST: input ist:", input, "und das Session-Haiku lautet", session.haiku #DEBUG
 
 		if input.query == "genZero": # initialer Ajax-Aufruf Teil 1
-			return json.dumps(session.haiku.getPhenotype())
+			try:
+				return json.dumps(session.haiku.getPhenotype())
+			except HTTPError, e: # muss vor URLError abgefangen werden
+				print "/haiku: HTTPError in Generation 0.", e
+				return web.HTTPError("500 HTTPError: " + str(e))
+			except WebFault, e:
+				print "/haiku: WebFault in Generation 0.", e
+				return web.HTTPError("500 WebFault: Communication Error mit dem Wortschatz-Server")#...ault: " + str(e.message))
+			except URLError, e:
+				print "/haiku: URLError in Generation 0.", e
+				return web.HTTPError("500 URLError: " + str(e))
 		elif input.query == "newKids": # initialer Ajax-Aufruf Teil 2 bzw. neue Kinder
 			parent = session.haiku
 		elif input.query == "l": # Linkes Kind
@@ -306,7 +317,18 @@ class Automatoetry:
 		# neue Kinder erzeugen
 		children = parent.procreateN(2)
 		for c in children:
-			c.getPhenotype()
+			try:
+				c.getPhenotype()
+			except HTTPError, e: # muss vor URLError abgefangen werden
+				print "/haiku: HTTPError beim Erzeugen neuer Kinder.", e
+				return web.HTTPError("500 HTTPError: " + str(e))
+			except WebFault, e:
+				print "/haiku: WebFault beim Erzeugen neuer Kinder.", e
+				return web.HTTPError("500 WebFault: Communication Error mit dem Wortschatz-Server")#...ault: " + str(e.message))
+			except URLError, e:
+				print "/haiku: URLError beim Erzeugen neuer Kinder.", e
+				return web.HTTPError("500 URLError " + str(e))
+
 		if parent != session.haiku:
 			session.haiku = parent
 

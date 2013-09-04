@@ -2,6 +2,7 @@
 
 jQuery(document).ready( function() {
 
+//	jQuery("input.button").data("disabled", false);
 	var finished1, finished2, errorType, errorTarget;
 	jQuery("#loading").show();
 
@@ -32,7 +33,7 @@ jQuery(document).ready( function() {
 		dataType: "json",
 
 		success: function(jsonData) {
-			console.log("/haiku Initialer Ajax-Aufruf Teil 1 -> Success-Function: jsonData ist " + jsonData.split("\n").join("<br />")); //DEBUG
+//			console.log("/haiku Initialer Ajax-Aufruf Teil 1 -> Success-Function: jsonData ist " + jsonData.split("\n").join("<br />")); //DEBUG
 
 			// Phaenotyp einfuegen
 			jQuery("tr.genZero td.phenotype").html(jsonData.split("\n").join("<br />"));
@@ -56,7 +57,7 @@ jQuery(document).ready( function() {
 		},
 
 		error: function(xhr, status, error) {
-			console.log("/haiku Initialer AJAX-Aufruf Teil 1 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+			console.log("/haiku Initialer AJAX-Aufruf Teil 1 fehlgeschlagen");//...agen: xhr, status, error sind ", xhr, status,  error);
 			jQuery("div.errorMsg").html('<p class="highlight">\
 				Ein Fehler ist aufgetreten: ' + error + '<br />\
 				Bitte versuchen Sie es <a href="" class="errorReload">erneut</a>.\
@@ -76,7 +77,7 @@ jQuery(document).ready( function() {
 		dataType: "json",
 
 		success: function(jsonData) {
-			console.log("/haiku Initialer Ajax-Aufruf Teil 2 -> Success-Function: jsonData ist", jsonData); //DEBUG
+//			console.log("/haiku Initialer Ajax-Aufruf Teil 2 -> Success-Function: jsonData ist", jsonData); //DEBUG
 
 			// Kinder-Zeile hinzufuegen
 			addTableRow(jsonData);
@@ -91,7 +92,7 @@ jQuery(document).ready( function() {
 		},
 
 		error: function(xhr, status, error) {
-			console.log("/haiku Initialer AJAX-Aufruf Teil 2 fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+			console.log("/haiku Initialer AJAX-Aufruf Teil 2 fehlgeschlagen");//...agen: xhr, status, error sind ", xhr, status,  error);
 			jQuery("div.errorMsg").html('<p class="highlight">\
 				Ein Fehler ist aufgetreten: ' + error + '<br /> \
 				Bitte versuchen Sie es <a href="" class="errorReload">noch einmal</a>.\
@@ -115,10 +116,10 @@ jQuery(document).ready( function() {
 
 	// Definiere Event-Handler fuer Kind-Buttons
 	jQuery("table").on("click", "tr.button-row input.button", function(event) {
-//	jQuery("table.haiku:not(.disabled)").on("click", "tr.button-row input.button", function(event) {
 
-		// Klasse "disabled" zu Tabelle hinzufügen, um weiteren Buttonclicks zuvorzukommen
-//		jQuery("table.haiku").addClass("disabled");
+		// Alle Buttons disablen
+		if (jQuery("input.button").attr("disabled") == "disabled") return false;
+		jQuery("input.button").attr("disabled", "disabled");
 
 		// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
@@ -148,7 +149,7 @@ jQuery(document).ready( function() {
 			dataType: "json",
 
 			success: function(jsonData) {
-				console.log("/haiku Kind-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+//				console.log("/haiku Kind-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
 
 				// verstecktes Kind loeschen
 				jQuery("tr.older:last td.phenotype").eq(lr).remove();
@@ -176,7 +177,7 @@ jQuery(document).ready( function() {
 			},
 
 			error: function(xhr, status, error) {
-				console.log("/haiku AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+				console.log("/haiku AJAX-Aufruf fehlgeschlagen");//...agen: xhr, status, error sind ", xhr, status,  error);
 				jQuery("div.errorMsg").html('<p class="highlight">\
 					Ein Fehler ist aufgetreten: ' + error + '<br /> \
 					Bitte führen Sie Ihre Aktion <a href="" class="errorRetrigger">erneut aus</a>.\
@@ -190,7 +191,7 @@ jQuery(document).ready( function() {
 
 			complete: function() {
 				jQuery("#loading").hide();
-//				jQuery("table.haiku").removeClass("disabled");
+				jQuery("input.button").removeAttr("disabled");
 			},
 		});
 		return false;
@@ -198,6 +199,10 @@ jQuery(document).ready( function() {
 
 	// Definiere Event-Handler fuer Neue-Kinder-Button
 	jQuery("table").on("click", "tr.older:last input.button", function(event) {
+
+		// Alle anderen Buttons disablen
+		if (jQuery("input.button").attr("disabled") == "disabled") return false;
+		jQuery("input.button").attr("disabled", "disabled");
 
 		// Event-Daten speichern fuer Retrigger-Link
 		errorType = event.type;
@@ -219,7 +224,7 @@ jQuery(document).ready( function() {
 			dataType: "json",
 
 			success: function(jsonData) {
-				console.log("/haiku Neue-Kinder-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
+//				console.log("/haiku Neue-Kinder-Button click()-Handler Success-Function: jsonData ist", jsonData); //DEBUG
 
 				// alte Kinder durch neue ersetzen
 				jQuery("tr.older:last td.phenotype:first")
@@ -234,7 +239,7 @@ jQuery(document).ready( function() {
 			},
 
 			error: function(xhr, status, error) {
-				console.log("/haiku AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+				console.log("/haiku AJAX-Aufruf fehlgeschlagen");//...agen: xhr, status, error sind ", xhr, status,  error);
 				jQuery("div.errorMsg").html('<p class="highlight">\
 					Ein Fehler ist aufgetreten: ' + error + '<br /> \
 					Bitte führen Sie Ihre Aktion <a href="" class="errorRetrigger">erneut aus</a>.\
@@ -244,10 +249,13 @@ jQuery(document).ready( function() {
 				jQuery("tr.older:last td").show();
 			},
 
-			complete: function() {	jQuery("#loading").hide(); },
+			complete: function() {
+				jQuery("#loading").hide();
+				jQuery("input.button").removeAttr("disabled");
+			},
 		});
 		return false;
 	});
 
-	console.log("/haiku Document ist ready."); //DEBUG
+//	console.log("/haiku Document ist ready."); //DEBUG
 });

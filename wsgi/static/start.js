@@ -5,6 +5,10 @@ jQuery(document).ready(function() {
 	// Den Buttons Event-Handler zuweisen.
 	jQuery("form").on("click", "button.button", function() {
 
+		// Alle Buttons disablen
+		if (jQuery("button.button").attr("disabled") == "disabled") return;
+		jQuery("button.button").attr("disabled", "disabled");
+
 		// evtl. Fehlermeldung loeschen
 		jQuery("div.errorMsg").html("");
 
@@ -32,16 +36,19 @@ jQuery(document).ready(function() {
 						jQuery("input#genes").val(data);
 						break;
 					default:
-						console.log("/ Fehler in der AJAX Success-function :-(");
+						console.log("/ Fehler in der AJAX Success-function");
 				}
 			},
 
 			error: function(xhr, status, error) {
-				console.log("/ AJAX-Aufruf fehlgeschlagen: xhr, status, error sind ", xhr, status,  error);
+				console.log("/ AJAX-Aufruf fehlgeschlagen");// ...agen: xhr, status, error sind ", xhr, status,  error);
 				jQuery("div.errorMsg").html('<p  class="highlight">Ein Fehler ist aufgetreten: ' + error + '<br /> Bitte versuchen Sie es erneut.</p>');
 			},
 
-			complete: function() {	jQuery("#loading").hide(); },
+			complete: function() {
+				jQuery("#loading").hide();
+				jQuery("button.button").removeAttr("disabled");
+			},
 		});
 		return false;
 	});

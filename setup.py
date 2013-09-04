@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-	name = "Tobias Radloff",
+	name = "automatoetry",
 	version = "1.0",
 	description = "Automatoetry - Automatized Haiku Poetry with genetic algorithms and Python",
 	author = "Tobias Radloff",
