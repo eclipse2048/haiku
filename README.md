@@ -46,6 +46,6 @@ Technische Details
 Von wem ist Automatoetry?
 -------------------------
 
-Autor: Tobias Radloff (http://www.tobias-radloff.de/blog)
+Autor: Tobias Radloff (http://www.tobias-radloff.de/)
 
 E-Mail: mail [at] tobias-radloff [Punkt] de
